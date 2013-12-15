@@ -30,6 +30,13 @@ document.addEventListener("click", function() {
 	el.requestPointerLock()
 }, false)
 
+window.addEventListener('resize', function() {
+	game.camera.aspect = window.innerWidth / window.innerHeight;
+	game.camera.updateProjectionMatrix();
+	renderer.setSize( window.innerWidth, window.innerHeight );
+}, false)
+
+
 game = null
 var time = Date.now()
 running = false
