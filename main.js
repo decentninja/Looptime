@@ -33,19 +33,22 @@ document.addEventListener("click", function() {
 game = null
 var time = Date.now()
 running = false
-function enterGame(name, password) {
-	// Do websocket setup, password logon and map loading etc
-	game = new Game()
-	running = true
-}
 function update() {
 	requestAnimationFrame(update)
 	if(running) {
 		var deltatime = Date.now() - time
 		game.update(deltatime)
-		renderer.render(game.map.scene, game.camera)
+		renderer.render(game.scene, game.camera)
 		time = Date.now()
 	}
 }
 update()
+function enterGame(name, password) {
+	// Do websocket setup, password logon and map loading etc
+	game = new Game()
+	running = true
+}
 enterGame("lobby")		// The lobby is also a game map but without networking
+document.addEventListener('mousemove', game.player.mouse, false)
+document.addEventListener('keydown', game.player.keydown, false)
+document.addEventListener('keyup', game.player.keyup, false)

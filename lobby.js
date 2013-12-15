@@ -1,12 +1,10 @@
-function Lobby() {
-	this.scene = new THREE.Scene()
-
+function Lobby(scene) {
 	// Light
 	var pointLight = new THREE.PointLight(0xFFFFFF)
 	pointLight.position.x = 10
 	pointLight.position.y = 50
 	pointLight.position.z = 130
-	this.scene.add(pointLight)
+	scene.add(pointLight)
 
 	// Sphere
 	var sphereMaterial =
@@ -16,7 +14,7 @@ function Lobby() {
 	var sphere = new THREE.Mesh(
 		new THREE.SphereGeometry(50, 16, 16), sphereMaterial)
 	sphere.position.z = -300
-	this.scene.add(sphere)
+	scene.add(sphere)
 
 	// Floor
 	geometry = new THREE.PlaneGeometry( 2000, 2000, 100, 100 );
@@ -35,5 +33,5 @@ function Lobby() {
 	}
 	material = new THREE.MeshBasicMaterial( { vertexColors: THREE.VertexColors } )
 	mesh = new THREE.Mesh( geometry, material )
-	this.scene.add(mesh)
+	scene.add(mesh)
 }
