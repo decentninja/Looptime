@@ -16,9 +16,9 @@ var pointerlockchange = function ( event ) {
 		document.mozPointerLockElement == el || 
 		document.webkitPointerLockElement == el
 	if(islocked) {
-		game.controls.enabled = true
+		game.player.enabled = true
 	} else {
-		game.controls.enabled = false
+		game.player.enabled = false
 	}
 }
 document.addEventListener('pointerlockchange', pointerlockchange, false)
@@ -49,6 +49,12 @@ function enterGame(name, password) {
 	running = true
 }
 enterGame("lobby")		// The lobby is also a game map but without networking
-document.addEventListener('mousemove', game.player.mouse, false)
-document.addEventListener('keydown', game.player.keydown, false)
-document.addEventListener('keyup', game.player.keyup, false)
+document.addEventListener('mousemove', function(event) {
+	game.player.mouse(event)
+}, false)
+document.addEventListener('keydown', function(event) {
+	game.player.keydown(event)
+}, false)
+document.addEventListener('keyup', function(event) {
+	game.player.keyup(event)
+}, false)
