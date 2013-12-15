@@ -13,11 +13,11 @@ function Game() {
 }
 
 Game.prototype.run = function() {
-	var i = 0
 	var that = this
 	this.interval = setInterval(function() {
-		i++
-		var now = that.timeline.get(i)
+		if(that.mousefocus)
+			console.log(that.gametime)
+		var now = that.timeline.get(that.gametime)
 		now.forEach(function(event) {
 			switch(event.action) {	// should be in player
 				case "move":
@@ -83,7 +83,7 @@ Game.prototype.update = function() {
 	var temptime = Date.now()
 	var deltatime = temptime - this.time
 	this.time = temptime
-	this.gametime += deltatime
+	this.gametime += Math.floor(deltatime / TIME_STEP)
 	this.players.forEach(function(player) {
 		player.update(deltatime)
 	})

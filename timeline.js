@@ -1,9 +1,9 @@
 function Timeline() {
-	this.theline = new Array(10000)
+	this.theline = new Array(100000)
 }
 
-Timeline.prototype.add = function(gametime, what) {
-	var index = Math.floor(gametime / TIME_STEP)
+Timeline.prototype.add = function(index, what) {
+	console.log("added on", index)
 	if(!this.theline[index]) {
 		this.theline[index] = [what]
 	} else {
