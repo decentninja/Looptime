@@ -63,6 +63,3 @@ document.addEventListener('mousemove', function(event) {
 document.addEventListener('keydown', function(event) {
 	game.keydown(event)
 }, false)
-document.addEventListener('keyup', function(event) {
-	game.keyup(event)
-}, false)

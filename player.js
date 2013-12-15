@@ -18,6 +18,15 @@ function Player(scene) {
 }
 
 Player.prototype.update = function(deltatime) {
-	var change = this.velocity.multiplyScalar(deltatime/30)
-	this.body.position.add(change)
+	var change = new THREE.Vector3()
+	change.copy(this.velocity)
+	change.multiplyScalar(deltatime/30)
+	this.body.translateX(change.x)
+	this.body.translateY(change.y)
+	this.body.translateZ(change.z)
+}
+
+Player.prototype.look = function(where) {
+	this.camera.rotation.x -= where.y * 0.002
+	this.body.rotation.y -= where.x * 0.002
 }

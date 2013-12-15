@@ -1,4 +1,5 @@
-var TIME_STEP = 100
+var TIME_STEP = 10
+var PLAYER_SPEED = 2.5
 
 function Game() {
 	this.mousefocus = false		// Pointer lock
@@ -8,11 +9,7 @@ function Game() {
 	this.map = new Lobby(this.scene)
 	this.players = [new Player(this.scene)]
 	this.active = this.players[0]
-	this.timeline = new Array(100000)
-	this.timeline[10] = {
-		id: 0,
-		action: "forward"
-	}
+	this.timeline = new Timeline()
 }
 
 Game.prototype.run = function() {
@@ -20,16 +17,18 @@ Game.prototype.run = function() {
 	var that = this
 	this.interval = setInterval(function() {
 		i++
-		that.players.forEach(function(player) {
-			player.velocity.multiplyScalar(0.5)
-			if(player.velocity.length() < 0.1) {
-				player.velocity.set(0, 0, 0)
+		var now = that.timeline.get(i)
+		now.forEach(function(event) {
+			switch(event.action) {	// should be in player
+				case "move":
+					that.players[event.id].velocity = event.change
+					console.log(event)
+					break
+				case "look":
+					that.players[event.id].look(event.change)
+					break
 			}
 		})
-		var now = that.timeline[i]
-		if(now) {
-			that.players[now.id].velocity.x = 2
-		}
 	}, TIME_STEP)
 }
 
@@ -39,20 +38,44 @@ Game.prototype.stop = function() {
 
 Game.prototype.mouse = function(event) {
 	if(this.mousefocus) {
-		console.log(event)
+		var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+		var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+		this.timeline.add(this.gametime, {
+			id: 0,
+			action: "look",
+			change: new THREE.Vector2(movementX, movementY)
+		})
 	}
 }
 
 Game.prototype.keydown = function(event) {
 	if(this.mousefocus) {
-		console.log(Math.round(this.gametime / TIME_STEP))
-		console.log(event)
-	}
-}
-
-Game.prototype.keyup = function(event) {
-	if(this.mousefocus) {
-		console.log(event)
+		var change = new THREE.Vector3()
+		switch ( event.keyCode ) {
+			case 38: // up
+			case 87: // w
+				change.z = -PLAYER_SPEED
+				break
+			case 37: // left
+			case 65: // a
+				change.x = -PLAYER_SPEED
+				break
+			case 40: // down
+			case 83: // s
+				change.z = PLAYER_SPEED
+				break
+			case 39: // right
+			case 68: // d
+				change.x = PLAYER_SPEED
+				break
+		}
+		if(change.length() != 0) {
+			this.timeline.add(this.gametime, {
+				id: 0,
+				action: "move",
+				change: change,
+			})
+		}
 	}
 }
 
