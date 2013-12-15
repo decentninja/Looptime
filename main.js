@@ -16,9 +16,9 @@ var pointerlockchange = function ( event ) {
 		document.mozPointerLockElement == el || 
 		document.webkitPointerLockElement == el
 	if(islocked) {
-		game.player.enabled = true
+		game.mousefocus = true
 	} else {
-		game.player.enabled = false
+		game.mousefocus = false
 	}
 }
 document.addEventListener('pointerlockchange', pointerlockchange, false)
@@ -31,37 +31,38 @@ document.addEventListener("click", function() {
 }, false)
 
 window.addEventListener('resize', function() {
-	game.camera.aspect = window.innerWidth / window.innerHeight;
-	game.camera.updateProjectionMatrix();
+	game.active.camera.aspect = window.innerWidth / window.innerHeight;
+	game.active.camera.updateProjectionMatrix();
 	renderer.setSize( window.innerWidth, window.innerHeight );
 }, false)
 
 
 game = null
-var time = Date.now()
 running = false
 function update() {
 	requestAnimationFrame(update)
 	if(running) {
-		var deltatime = Date.now() - time
-		game.update(deltatime)
-		renderer.render(game.scene, game.camera)
-		time = Date.now()
+		game.update()
+		renderer.render(game.scene, game.active.camera)
 	}
 }
 update()
 function enterGame(name, password) {
 	// Do websocket setup, password logon and map loading etc
+	if(game) {
+		game.stop()
+	}
 	game = new Game()
+	game.run()
 	running = true
 }
 enterGame("lobby")		// The lobby is also a game map but without networking
 document.addEventListener('mousemove', function(event) {
-	game.player.mouse(event)
+	game.mouse(event)
 }, false)
 document.addEventListener('keydown', function(event) {
-	game.player.keydown(event)
+	game.keydown(event)
 }, false)
 document.addEventListener('keyup', function(event) {
-	game.player.keyup(event)
+	game.keyup(event)
 }, false)
