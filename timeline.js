@@ -4,9 +4,9 @@
 
 function Timeline(initialState) {
 	this.timeline = new Array(100000)	// about 16 minutes of gameplay
-	this.timeline = [{
+	this.timeline[0] = {
 		players: []
-	}]
+	}
 	this.i = 0
 }
 

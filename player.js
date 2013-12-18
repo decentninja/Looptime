@@ -4,7 +4,8 @@
 
 var PLAYER_SPEED = 3 
 
-function Player(scene) {
+function Player(scene, id) {
+	this.id = id
 	this.events = []	// Events this tick
 	this.body = new THREE.Mesh(new THREE.CubeGeometry(5, 10, 5))
 	this.body.position.y = 8
