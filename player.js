@@ -22,6 +22,7 @@ function Player(scene) {
 	gun.rotation.x = - Math.PI / 2
 
 	this.velocity = new THREE.Vector3()
+	this.angular = new THREE.Vector2()
 }
 
 Player.prototype.update = function(deltatime) {
@@ -31,6 +32,10 @@ Player.prototype.update = function(deltatime) {
 	this.body.translateX(change.x)
 	this.body.translateY(change.y)
 	this.body.translateZ(change.z)
+	this.camera.rotation.x += this.angular.x
+	this.angular.x -= this.angular.x
+	this.body.rotation.y += this.angular.y
+	this.angular.y -= this.angular.y
 }
 
 Player.prototype.handle = function(event, isReplay) {
@@ -41,8 +46,8 @@ Player.prototype.handle = function(event, isReplay) {
 		case "mousemove":
 			var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0
 			var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0
-			this.camera.rotation.x -= movementY * 0.002
-			this.body.rotation.y -= movementX * 0.002
+			this.angular.x -= movementY * 0.002
+			this.angular.y -= movementX * 0.002
 			break
 		case "keydown":
 		case "keyup":
