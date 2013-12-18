@@ -1,4 +1,11 @@
+/*
+	Player mesh, update and event handling
+ */
+
+var PLAYER_SPEED = 10 
+
 function Player(scene) {
+	this.events = []	// Events this tick
 	this.body = new THREE.Mesh(new THREE.CubeGeometry(5, 10, 5))
 	this.body.position.y = 8
 	scene.add(this.body)
@@ -26,7 +33,47 @@ Player.prototype.update = function(deltatime) {
 	this.body.translateZ(change.z)
 }
 
-Player.prototype.look = function(where) {
-	this.camera.rotation.x -= where.y * 0.002
-	this.body.rotation.y -= where.x * 0.002
+Player.prototype.handle = function(event, isReplay) {
+	console.log(this)
+	switch(event.type) {
+		case "click":
+			console.log("TODO Fire gun!")
+			break
+		case "mousemove":
+			var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0
+			var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0
+			this.camera.rotation.x -= movementY * 0.002
+			this.body.rotation.y -= movementX * 0.002
+			break
+		case "keydown":
+		case "keyup":
+			var change
+			if(event.type == "keydown") {
+				change = PLAYER_SPEED
+			} else {
+				change = 0
+			}
+			switch ( event.keyCode ) {
+				case 38: // up
+				case 87: // w
+					this.velocity.z = change
+					break
+				case 37: // left
+				case 65: // a
+					this.velocity.x = change
+					break
+				case 40: // down
+				case 83: // s
+					this.velocity.z = change
+					break
+				case 39: // right
+				case 68: // d
+					this.velocity.x = change
+					break
+			}
+			break
+	}
+	if(!isReplay) {
+		this.events.push(event)
+	}
 }

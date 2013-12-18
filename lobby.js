@@ -1,3 +1,8 @@
+/*
+	Debug level, future tutorial and game select menu
+	With code from http://threejs.org/examples/#misc_controls_pointerlock
+ */
+
 function Lobby(scene) {
 	// Light
 	var pointLight = new THREE.PointLight(0xFFFFFF)

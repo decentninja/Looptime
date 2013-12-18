@@ -1,90 +1,36 @@
-var TIME_STEP = 10
-var PLAYER_SPEED = 2.5
+/*
+	Scene, active player, time
+ */
 
 function Game() {
-	this.mousefocus = false		// Pointer lock
-	this.gametime = 0			// Milliseconds from gamestart
-	this.time = Date.now()		// Unix time
+	this.pointerIsLocked = false
+	this.time = performance.now()
+	this.intotick = 0
 	this.scene = new THREE.Scene()
 	this.map = new Lobby(this.scene)
-	this.players = [new Player(this.scene)]
-	this.active = this.players[0]
+	this.activeplayer = new Player(this.scene)
 	this.timeline = new Timeline()
+	this.timeline.addPlayer(new Player(this.scene))
 }
 
-Game.prototype.run = function() {
-	var that = this
-	this.interval = setInterval(function() {
-		if(that.mousefocus)
-			console.log(that.gametime)
-		var now = that.timeline.get(that.gametime)
-		now.forEach(function(event) {
-			switch(event.action) {	// should be in player
-				case "move":
-					that.players[event.id].velocity = event.change
-					console.log(event)
-					break
-				case "look":
-					that.players[event.id].look(event.change)
-					break
-			}
-		})
-	}, TIME_STEP)
-}
-
-Game.prototype.stop = function() {
-	clearInterval(this.interval)
-}
-
-Game.prototype.mouse = function(event) {
-	if(this.mousefocus) {
-		var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-		var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
-		this.timeline.add(this.gametime, {
-			id: 0,
-			action: "look",
-			change: new THREE.Vector2(movementX, movementY)
-		})
-	}
-}
-
-Game.prototype.keydown = function(event) {
-	if(this.mousefocus) {
-		var change = new THREE.Vector3()
-		switch ( event.keyCode ) {
-			case 38: // up
-			case 87: // w
-				change.z = -PLAYER_SPEED
-				break
-			case 37: // left
-			case 65: // a
-				change.x = -PLAYER_SPEED
-				break
-			case 40: // down
-			case 83: // s
-				change.z = PLAYER_SPEED
-				break
-			case 39: // right
-			case 68: // d
-				change.x = PLAYER_SPEED
-				break
-		}
-		if(change.length() != 0) {
-			this.timeline.add(this.gametime, {
-				id: 0,
-				action: "move",
-				change: change,
-			})
-		}
+Game.prototype.handle = function(event) {
+	if(this.pointerIsLocked) {
+		this.activeplayer.handle(event)
 	}
 }
 
 Game.prototype.update = function() {
-	var temptime = Date.now()
+	var temptime = performance.now()
 	var deltatime = temptime - this.time
 	this.time = temptime
-	this.gametime += Math.floor(deltatime / TIME_STEP)
-	this.players.forEach(function(player) {
+	this.intotick += deltatime
+	if(this.intotick >= 100) {
+		this.timeline.next()
+		this.intotick -= 100
+	}
+	var state = this.timeline.get()
+	state.players.forEach(function(player) {
+		this.timeline.addPlayer(player)
 		player.update(deltatime)
 	})
 }
