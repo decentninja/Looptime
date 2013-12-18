@@ -33,7 +33,7 @@ function update() {
 	requestAnimationFrame(update)
 	if(running) {
 		game.update()
-		renderer.render(game.scene, game.getActivePlayer().camera)
+		renderer.render(game.scene, game.activeplayer.camera)
 	}
 }
 
