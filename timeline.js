@@ -22,7 +22,11 @@ Timeline.prototype.next = function() {
 	}
 }
 
-Timeline.prototype.get = function() {
+Timeline.prototype.getLastState = function() {
+	return this.timeline[this.i -1]
+}
+
+Timeline.prototype.getCurrentState = function() {
 	return this.timeline[this.i]
 }
 

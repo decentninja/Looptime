@@ -10,7 +10,8 @@ function Game() {
 	this.map = new Lobby(this.scene)
 	this.activeplayer = new Player(this.scene)
 	this.timeline = new Timeline()
-	this.timeline.addPlayer(new Player(this.scene))
+	this.timeline.addPlayer(this.activeplayer)
+	this.state = this.timeline.getCurrentState()
 }
 
 Game.prototype.handle = function(event) {
@@ -24,13 +25,18 @@ Game.prototype.update = function() {
 	var deltatime = temptime - this.time
 	this.time = temptime
 	this.intotick += deltatime
-	if(this.intotick >= 100) {
-		this.timeline.next()
-		this.intotick -= 100
-	}
-	var state = this.timeline.get()
-	state.players.forEach(function(player) {
-		this.timeline.addPlayer(player)
+	this.activeplayer.update(deltatime)
+	this.state.players.forEach(function(player) {
 		player.update(deltatime)
 	})
+	if(this.intotick >= 100) {
+		this.timeline.next()
+		this.state = this.timeline.getCurrentState()
+		var last = this.timeline.getLastState()
+		var that = this
+		last.players.forEach(function(player) {
+			that.timeline.addPlayer(player)
+		})
+		this.intotick -= 100
+	}
 }

@@ -2,7 +2,7 @@
 	Player mesh, update and event handling
  */
 
-var PLAYER_SPEED = 10 
+var PLAYER_SPEED = 3 
 
 function Player(scene) {
 	this.events = []	// Events this tick
@@ -34,7 +34,6 @@ Player.prototype.update = function(deltatime) {
 }
 
 Player.prototype.handle = function(event, isReplay) {
-	console.log(this)
 	switch(event.type) {
 		case "click":
 			console.log("TODO Fire gun!")
@@ -56,11 +55,11 @@ Player.prototype.handle = function(event, isReplay) {
 			switch ( event.keyCode ) {
 				case 38: // up
 				case 87: // w
-					this.velocity.z = change
+					this.velocity.z = -change
 					break
 				case 37: // left
 				case 65: // a
-					this.velocity.x = change
+					this.velocity.x = -change
 					break
 				case 40: // down
 				case 83: // s
