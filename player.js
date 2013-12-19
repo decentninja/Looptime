@@ -2,8 +2,8 @@
 	Player state at one tick
  */
 function Player(id, speed) {
-	this.position = THREE.Vector3()
-	this.look = THREE.Euler()
+	this.position = new THREE.Vector3()
+	this.look = new THREE.Euler()
 	this.id = id
 	this.version = 0
 	this.speed = speed
@@ -38,7 +38,7 @@ Player.prototype.evaluate = function(event) {
 function PlayerEvent(event, id, version) {
 	this.id = id
 	this.version = version
-	this.type: event.type
+	this.type = event.type
 	switch(event.type) {
 		case "mousemove":
 			this.mouse = new Euler()

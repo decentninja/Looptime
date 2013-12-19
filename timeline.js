@@ -9,13 +9,15 @@ function Timewave(time, speed, state) {
 }
 
 Timewave.prototype.tick = function(events) {
-	events.forEach(function(event) {
-		this.state.players.forEach(function(player) {
-			if(event.id == player.id && event.version == player.version) {
-				player.evaluate(event)
-			}
-		})
-	}, this)
+	if(events) {		// Is someone doing something?
+		events.forEach(function(event) {
+			this.state.players.forEach(function(player) {
+				if(event.id == player.id && event.version == player.version) {
+					player.evaluate(event)
+				}
+			})
+		}, this)
+	}
 	this.ticksDoneThisTick++
 	this.time++
 }

@@ -2,10 +2,10 @@
 	DOM stuff, start and global debugging hooks
  */
 
-debug = location.search == "?debug=true"
+var debug = location.search == "?debug=true"
 
-el = document.querySelector("#game")
-renderer = new THREE.WebGLRenderer({
+var el = document.querySelector("#game")
+var renderer = new THREE.WebGLRenderer({
     canvas: el,
     antialias: true,
 })
@@ -24,14 +24,14 @@ var pointerlockchange = function ( event ) {
 	}
 }
 
-game = null				// Game logic scope
+var game = null				// Game logic scope
 function enterGame(name) {
 	// TODO websocket setup, password logon and map loading etc
 	game = new Game()
 }
 function update() {
 	requestAnimationFrame(update)
-	if(!debug || debug && game.pointerlockchange) {		// Pause on mouse blur while not debugging
+	if(!debug || debug && game.pointerIsLocked) {		// Pause on mouse blur while not debugging
 		game.update()
 		renderer.render(game.scene, game.activeplayer.camera)
 	}

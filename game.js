@@ -2,8 +2,8 @@
 	Scene, active player, time
  */
 
-PLAYER_SPEED = 1		// GLOBAL for testing modifications
-SAVE_STATE_RATE = 30
+var PLAYER_SPEED = 1
+var SAVE_STATE_RATE = 30
 
 function Game() {
 	this.timeline = new Timeline(SAVE_STATE_RATE)		// Save state twice every second
@@ -20,12 +20,13 @@ function Game() {
 	var initialState = {
 		players: [new Player(0, PLAYER_SPEED)]
 	}
-	this.playerwave = new Timewave(0, 1, initialState)
+	this.playerwave = new Timewave(-1, 1, initialState)
 	this.timeline.timewaves.push(this.playerwave)
 	this.controlled = {
 		id: 0,
 		version: 0
 	}
+	this.activeplayer = null
 	this.update()		// Create model and camera for first frame
 }
 
@@ -37,7 +38,7 @@ Game.prototype.handle = function(event) {
 
 Game.prototype.update = function() {
 	this.time++
-	timeline.tick()
+	this.timeline.tick()
 
 	// Add new players, timeclones and update old players
 	this.playerModels.children.forEach(function(players) {
@@ -56,7 +57,7 @@ Game.prototype.update = function() {
 		}
 		var version = versions.children.filter(function(version) {
 			return verions.version === player.version
-		}, this)
+		}, this)[0]
 		if(!version) {
 			var version = new PlayerModel(player.id, player.version)
 			versions.add(version)
@@ -72,6 +73,7 @@ Game.prototype.update = function() {
 			}
 			if(this.controlled.id === model.id && this.controlled.version === model.version) {
 				this.activeplayer = model 	// Switch camera if nessesary
+				console.log("new camera")
 			}
 		})
 	}, this)
