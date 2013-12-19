@@ -2,6 +2,8 @@
 	DOM stuff, start and global debugging hooks
  */
 
+debug = location.search == "?debug=true"
+
 el = document.querySelector("#game")
 renderer = new THREE.WebGLRenderer({
     canvas: el,
@@ -23,15 +25,13 @@ var pointerlockchange = function ( event ) {
 }
 
 game = null				// Game logic scope
-running = false			// "Pause button"
 function enterGame(name, password) {
 	// TODO websocket setup, password logon and map loading etc
 	game = new Game()
-	running = true
 }
 function update() {
 	requestAnimationFrame(update)
-	if(running) {
+	if(!debug || debug && game.pointerlockchange) {		// Pause on mouse blur while not debugging
 		game.update()
 		renderer.render(game.scene, game.activeplayer.camera)
 	}
