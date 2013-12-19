@@ -8,14 +8,15 @@ function Timewave(time, speed, state) {
 	this.state = deepCopy(state)
 }
 
-//events - all events that happen at the current time
 Timewave.prototype.tick = function(events) {
-	//TODO: do things to state
+	events.forEach(function(event) {
+		this.state.evaluate(event)
+	})
 	this.ticksDoneThisTick++
 	this.time++
 }
 
-// Increment without updateing. Usefull when other timewaves are on top and already evaluated state
+// Increment without updateing. Useful when other timewaves are on top
 Timewave.prototype.noopTick = function(state) {
 	this.state = deepCopy(state)
 	this.ticksDoneThisTick++
@@ -25,10 +26,10 @@ Timewave.prototype.noopTick = function(state) {
 /*
 	Bookkeeping events, states and waves
  */
-function Timeline(stateFrequency, initialState) {
+function Timeline(stateFrequency) {
 	this.timewaves = []
 	this.events = []    // IMPROV Prealocate for performance?
-	this.states = [initialState]
+	this.states = []
 	this.stateFrequency = stateFrequency
 }
 
