@@ -33,7 +33,9 @@ Player.prototype.evaluate = function(event) {
 /*
 	Player event type
  */
-function PlayerEvent(event) {
+function PlayerEvent(event, id, version) {
+	this.id = id
+	this.version = version
 	this.type: event.type
 	switch(event.type) {
 		case "mousemove":
@@ -77,7 +79,9 @@ function PlayerEvent(event) {
 /*
 	Player model data
  */
-function PlayerModel(scene) {
+function PlayerModel(id, version) {
+	this.id = id
+	this.version = version
 	this.body = new THREE.Mesh(new THREE.CubeGeometry(5, 10, 5))
 	this.body.position.y = 8
 	scene.add(this.body)		// Should be added here or elsewear? idk
@@ -94,9 +98,6 @@ function PlayerModel(scene) {
 	gun.rotation.x = - Math.PI / 2
 }
 
-/*
-	Position model based on Player.State
- */
-Player.Model.prototype.update = function(state) {
-
+PlayerModel.prototype.update = function(playerstate) {
+	// TODO Position and rotate everything
 }
