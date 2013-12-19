@@ -25,7 +25,7 @@ var pointerlockchange = function ( event ) {
 }
 
 game = null				// Game logic scope
-function enterGame(name, password) {
+function enterGame(name) {
 	// TODO websocket setup, password logon and map loading etc
 	game = new Game()
 }

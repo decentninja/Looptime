@@ -2,8 +2,11 @@
 	Scene, active player, time
  */
 
+PLAYER_SPEED = 1		// GLOBAL for testing modifications
+SAVE_STATE_RATE = 30
+
 function Game() {
-	this.timeline = new Timeline(30)		// Save state twice every second
+	this.timeline = new Timeline(SAVE_STATE_RATE)		// Save state twice every second
 	this.pointerIsLocked = false
 	this.time = 0
 
@@ -15,7 +18,7 @@ function Game() {
 
 	// Initialize controlled player
 	var initialState = {
-		players: [new Player(0)]
+		players: [new Player(0, PLAYER_SPEED)]
 	}
 	this.playerwave = new Timewave(0, 1, initialState)
 	this.timeline.timewaves.push(this.playerwave)

@@ -1,13 +1,12 @@
-var PLAYER_SPEED = 1
-
 /*
 	Player state at one tick
  */
-function Player(id) {
+function Player(id, speed) {
 	this.position = THREE.Vector3()
 	this.look = THREE.Euler()
 	this.id = id
 	this.version = 0
+	this.speed = speed
 }
 
 /*
@@ -24,8 +23,11 @@ Player.prototype.evaluate = function(event) {
 			break
 		case "keydown":
 		case "keyup":
-			// TODO position update euler angles
-			// http://www-rohan.sdsu.edu/~stewart/cs583/LearningXNA3_lects/Lect15_Ch11_CreateFirstPersonCamera.html
+			var offset = new Vector3()
+			var up = new Vector3(0, 1, 0)		// TODO Check is this correct?
+			offset.crossVectors(up, this.look)
+			offset.multiplyScalar(this.speed)
+			this.position.add(offset)
 			break
 	}
 }
@@ -84,7 +86,6 @@ function PlayerModel(id, version) {
 	this.version = version
 	this.body = new THREE.Mesh(new THREE.CubeGeometry(5, 10, 5))
 	this.body.position.y = 8
-	scene.add(this.body)		// Should be added here or elsewear? idk
 
 	this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000)
 	this.body.add(this.camera)
@@ -99,5 +100,7 @@ function PlayerModel(id, version) {
 }
 
 PlayerModel.prototype.update = function(playerstate) {
-	// TODO Position and rotate everything
+	this.body.position = playerstate.position
+	this.body.rotation.y = playerstate.look.y
+	this.camera.rotation.x = playerstate.look.x
 }
