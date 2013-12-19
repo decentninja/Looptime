@@ -1,53 +1,49 @@
+var PLAYER_SPEED = 1
+
 /*
-	Player mesh, update and event handling
+	Player state at one tick
  */
-
-var PLAYER_SPEED = 3 
-
-function Player(scene) {
-	this.events = []	// Events this tick
-	this.body = new THREE.Mesh(new THREE.CubeGeometry(5, 10, 5))
-	this.body.position.y = 8
-	scene.add(this.body)
-
-	this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000)
-	this.body.add(this.camera)
-	this.camera.position.y = 1.8
-
-	var gun = new THREE.Mesh(new THREE.CubeGeometry(0.3, 4, 0.75))
-	this.camera.add(gun)
-	gun.position.y = -1
-	gun.position.x = 1
-	gun.position.z = -2
-	gun.rotation.x = - Math.PI / 2
-
-	this.velocity = new THREE.Vector3()
-	this.angular = new THREE.Vector2()
+function Player(id) {
+	this.position = THREE.Vector3()
+	this.look = THREE.Euler()
+	this.id = id
+	this.version = 0
 }
 
-Player.prototype.update = function(deltatime) {
-	var change = new THREE.Vector3()
-	change.copy(this.velocity)
-	change.multiplyScalar(deltatime/30)
-	this.body.translateX(change.x)
-	this.body.translateY(change.y)
-	this.body.translateZ(change.z)
-	this.camera.rotation.x += this.angular.x
-	this.angular.x -= this.angular.x
-	this.body.rotation.y += this.angular.y
-	this.angular.y -= this.angular.y
-}
-
-Player.prototype.handle = function(event, isReplay) {
+/*
+	Event handling
+ */
+Player.prototype.evaluate = function(event) {
 	switch(event.type) {
 		case "click":
 			console.log("TODO Fire gun!")
 			break
 		case "mousemove":
-			var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0
-			var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0
-			this.angular.x -= movementY * 0.002
-			this.angular.y -= movementX * 0.002
+			this.look.x += event.mouse.x
+			this.look.y += event.mouse.y
+			break
+		case "keydown":
+		case "keyup":
+			// TODO position update euler angles
+			// http://www-rohan.sdsu.edu/~stewart/cs583/LearningXNA3_lects/Lect15_Ch11_CreateFirstPersonCamera.html
+			break
+	}
+}
+
+/*
+	Player event type
+ */
+function PlayerEvent(event) {
+	this.type: event.type
+	switch(event.type) {
+		case "mousemove":
+			this.mouse = new Euler()
+			this.mouse.y = event.movementX || event.mozMovementX || event.webkitMovementX || 0
+			this.mouse.x = event.movementY || event.mozMovementY || event.webkitMovementY || 0
+			this.mouse.multiplyScalar(0.002)
+			break
+		case "click":
+			// TODO What button
 			break
 		case "keydown":
 		case "keyup":
@@ -75,9 +71,32 @@ Player.prototype.handle = function(event, isReplay) {
 					this.velocity.x = change
 					break
 			}
-			break
 	}
-	if(!isReplay) {
-		this.events.push(event)
-	}
+}
+
+/*
+	Player model data
+ */
+function PlayerModel(scene) {
+	this.body = new THREE.Mesh(new THREE.CubeGeometry(5, 10, 5))
+	this.body.position.y = 8
+	scene.add(this.body)		// Should be added here or elsewear? idk
+
+	this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000)
+	this.body.add(this.camera)
+	this.camera.position.y = 1.8
+
+	var gun = new THREE.Mesh(new THREE.CubeGeometry(0.3, 4, 0.75))
+	this.camera.add(gun)
+	gun.position.y = -1
+	gun.position.x = 1
+	gun.position.z = -2
+	gun.rotation.x = - Math.PI / 2
+}
+
+/*
+	Position model based on Player.State
+ */
+Player.Model.prototype.update = function(state) {
+
 }
