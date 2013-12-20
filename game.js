@@ -3,11 +3,11 @@
  */
 
 var PLAYER_SPEED = 0.1
-var SAVE_STATE_RATE = 30
+var SAVE_STATE_RATE = 30		// Save state twice every second
 var TARGET_FRAMERATE = 60
 
 function Game() {
-	this.timeline = new Timeline(SAVE_STATE_RATE)		// Save state twice every second
+	this.timeline = new Timeline(SAVE_STATE_RATE, this.ticker)
 	this.pointerIsLocked = false
 	this.time = 0
 	this.deltatime = null
@@ -61,7 +61,7 @@ Game.prototype.update = function() {
 
 	for(var i = 0; i <= this.deltatime; i += 1000/TARGET_FRAMERATE) {	// Catch up
 		this.time++
-		this.timeline.tick(this.ticker)
+		this.timeline.tick()
 	}
 
 	// Add new players, timeclones and update old players
