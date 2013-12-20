@@ -1,12 +1,12 @@
 /*
 	Player state at one tick
  */
-function Player(id, speed) {
-	this.position = new THREE.Vector3()
+function Player(id) {
+	this.position = new THREE.Vector3(0, 4, 0)
+	this.velocity = new THREE.Vector3()
 	this.look = new THREE.Vector3()
 	this.id = id
 	this.version = 0
-	this.speed = speed
 }
 
 /*
@@ -23,13 +23,26 @@ Player.prototype.evaluate = function(event) {
 			break
 		case "keydown":
 		case "keyup":
-			var offset = new THREE.Vector3()
-			var up = new THREE.Vector3(0, 1, 0)		// TODO Check is this correct?
-			offset.crossVectors(up, this.look)
-			offset.multiplyScalar(this.speed)
-			this.position.add(offset)
+			var object = new THREE.Object3D()	// XXX Should be done with math
+			object.position.x = this.position.x
+			object.position.y = this.position.y
+			object.position.z = this.position.z
+			object.rotation.x = this.look.x
+			object.rotation.y = this.look.y
+			object.rotation.z = this.look.z
+			object.translateX(event.direction.x)
+			object.translateY(event.direction.y)
+			object.translateZ(event.direction.z)
+			this.velocity.subVectors(object.position, this.position)
+			this.velocity.y = 0
 			break
 	}
+}
+
+Player.prototype.update = function(deltatime) {
+	var offset = new THREE.Vector3()
+	offset.copy(this.velocity).multiplyScalar(deltatime)
+	this.position.add(offset)
 }
 
 /*
@@ -57,23 +70,23 @@ function PlayerEvent(event, id, version) {
 			} else {
 				change = 0
 			}
-			this.velocity = new THREE.Vector3()
+			this.direction = new THREE.Vector3()
 			switch ( event.keyCode ) {
 				case 38: // up
 				case 87: // w
-					this.velocity.z = -change
+					this.direction.z = -change
 					break
 				case 37: // left
 				case 65: // a
-					this.velocity.x = -change
+					this.direction.x = -change
 					break
 				case 40: // down
 				case 83: // s
-					this.velocity.z = change
+					this.direction.z = change
 					break
 				case 39: // right
 				case 68: // d
-					this.velocity.x = change
+					this.direction.x = change
 					break
 			}
 	}

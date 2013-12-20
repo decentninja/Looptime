@@ -2,13 +2,16 @@
 	Scene, active player, time
  */
 
-var PLAYER_SPEED = 1
+var PLAYER_SPEED = 0.1
 var SAVE_STATE_RATE = 30
+var TARGET_FRAMERATE = 60
 
 function Game() {
 	this.timeline = new Timeline(SAVE_STATE_RATE)		// Save state twice every second
 	this.pointerIsLocked = false
 	this.time = 0
+	this.deltatime = null
+	this.realtime = performance.now()
 
 	this.scene = new THREE.Scene()
 	this.map = new Lobby(this.scene)
@@ -18,7 +21,7 @@ function Game() {
 
 	// Initialize controlled player
 	var initialState = {
-		players: [new Player(0, PLAYER_SPEED)]
+		players: [new Player(0)]
 	}
 	this.playerwave = new Timewave(-1, 1, initialState)
 	this.timeline.timewaves.push(this.playerwave)
@@ -36,9 +39,30 @@ Game.prototype.handle = function(event) {
 	}
 }
 
+Game.prototype.ticker = function(state, events) {
+	if(events) {		// Is someone doing something?
+		events.forEach(function(event) {
+			state.players.forEach(function(player) {
+				if(event.id == player.id && event.version == player.version) {
+					player.evaluate(event)
+				}
+			})
+		}, this)
+	}
+	state.players.forEach(function(player) {
+		player.update(1000/TARGET_FRAMERATE)
+	})
+}
+
 Game.prototype.update = function() {
-	this.time++
-	this.timeline.tick()
+	var temptime = performance.now()
+	var deltatime = temptime - this.realtime
+	this.realtime = temptime
+
+	for(var i = 0; i <= this.deltatime; i += 1000/TARGET_FRAMERATE) {	// Catch up
+		this.time++
+		this.timeline.tick(this.ticker)
+	}
 
 	// Add new players, timeclones and update old players
 	this.playerModels.children.forEach(function(players) {

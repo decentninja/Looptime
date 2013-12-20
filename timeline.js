@@ -8,16 +8,8 @@ function Timewave(time, speed, state) {
 	this.state = deepCopy(state)
 }
 
-Timewave.prototype.tick = function(events) {
-	if(events) {		// Is someone doing something?
-		events.forEach(function(event) {
-			this.state.players.forEach(function(player) {
-				if(event.id == player.id && event.version == player.version) {
-					player.evaluate(event)
-				}
-			})
-		}, this)
-	}
+Timewave.prototype.tick = function(events, ticker) {
+	ticker(this.state, events)
 	this.ticksDoneThisTick++
 	this.time++
 }
@@ -42,7 +34,7 @@ function Timeline(stateFrequency) {
 /*
 	Move all timewaves according to their speed. Handle wave collision with noopTick's.
  */
-Timeline.prototype.tick = function() {
+Timeline.prototype.tick = function(ticker) {
 	this.timewaves.sort(function(a, b) {
 		a.time - b.time
 	})
@@ -51,7 +43,7 @@ Timeline.prototype.tick = function() {
 	})
 	this.timewaves.forEach(function(tickerwave, ti) {
 		while (tickerwave.ticksDoneThisTick < tickerwave.speed) {
-			tickerwave.tick(this.events[tickerwave.time])
+			tickerwave.tick(this.events[tickerwave.time], ticker)
 			for (var i = ti + 1; i < this.timewaves.length; i++) {
 				if (this.timewaves[i].time === tickerwave.time - 1 && this.timewaves[i].ticksDoneThisTick < this.timewaves[i].speed) {
 					this.timewaves[i].noopTick(tickerwave.state)
