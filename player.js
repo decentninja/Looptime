@@ -3,7 +3,7 @@
  */
 function Player(id, speed) {
 	this.position = new THREE.Vector3()
-	this.look = new THREE.Euler()
+	this.look = new THREE.Vector3()
 	this.id = id
 	this.version = 0
 	this.speed = speed
@@ -23,8 +23,8 @@ Player.prototype.evaluate = function(event) {
 			break
 		case "keydown":
 		case "keyup":
-			var offset = new Vector3()
-			var up = new Vector3(0, 1, 0)		// TODO Check is this correct?
+			var offset = new THREE.Vector3()
+			var up = new THREE.Vector3(0, 1, 0)		// TODO Check is this correct?
 			offset.crossVectors(up, this.look)
 			offset.multiplyScalar(this.speed)
 			this.position.add(offset)
@@ -41,10 +41,10 @@ function PlayerEvent(event, id, version) {
 	this.type = event.type
 	switch(event.type) {
 		case "mousemove":
-			this.mouse = new Euler()
+			this.mouse = new THREE.Vector2()
 			this.mouse.y = event.movementX || event.mozMovementX || event.webkitMovementX || 0
 			this.mouse.x = event.movementY || event.mozMovementY || event.webkitMovementY || 0
-			this.mouse.multiplyScalar(0.002)
+			this.mouse.multiplyScalar(-0.002)
 			break
 		case "click":
 			// TODO What button
@@ -57,6 +57,7 @@ function PlayerEvent(event, id, version) {
 			} else {
 				change = 0
 			}
+			this.velocity = new THREE.Vector3()
 			switch ( event.keyCode ) {
 				case 38: // up
 				case 87: // w
@@ -82,10 +83,12 @@ function PlayerEvent(event, id, version) {
 	Player model data
  */
 function PlayerModel(id, version) {
+	THREE.Object3D.call( this );
 	this.id = id
 	this.version = version
 	this.body = new THREE.Mesh(new THREE.CubeGeometry(5, 10, 5))
 	this.body.position.y = 8
+	this.add(this.body)
 
 	this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000)
 	this.body.add(this.camera)
@@ -98,6 +101,8 @@ function PlayerModel(id, version) {
 	gun.position.z = -2
 	gun.rotation.x = - Math.PI / 2
 }
+
+PlayerModel.prototype = Object.create(THREE.Object3D.prototype)
 
 PlayerModel.prototype.update = function(playerstate) {
 	this.body.position = playerstate.position

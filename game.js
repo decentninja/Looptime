@@ -56,7 +56,7 @@ Game.prototype.update = function() {
 			this.playerModels.add(versions)
 		}
 		var version = versions.children.filter(function(version) {
-			return verions.version === player.version
+			return version.version === player.version
 		}, this)[0]
 		if(!version) {
 			var version = new PlayerModel(player.id, player.version)
@@ -73,8 +73,7 @@ Game.prototype.update = function() {
 			}
 			if(this.controlled.id === model.id && this.controlled.version === model.version) {
 				this.activeplayer = model 	// Switch camera if nessesary
-				console.log("new camera")
 			}
-		})
+		}, this)
 	}, this)
 }
