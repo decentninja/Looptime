@@ -3,7 +3,12 @@
  */
 function Player(id) {
 	this.position = new THREE.Vector3(0, 4, 0)
-	this.velocity = new THREE.Vector3()
+	this.movement = {
+		forward: 0,
+		back: 0,
+		left: 0,
+		right: 0
+	}
 	this.look = new THREE.Vector3()
 	this.id = id
 	this.version = 0
@@ -23,26 +28,34 @@ Player.prototype.evaluate = function(event) {
 			break
 		case "keydown":
 		case "keyup":
-			var object = new THREE.Object3D()	// XXX Should be done with math
-			object.position.x = this.position.x
-			object.position.y = this.position.y
-			object.position.z = this.position.z
-			object.rotation.x = this.look.x
-			object.rotation.y = this.look.y
-			object.rotation.z = this.look.z
-			object.translateX(event.direction.x)
-			object.translateY(event.direction.y)
-			object.translateZ(event.direction.z)
-			this.velocity.subVectors(object.position, this.position)
-			this.velocity.y = 0
+			for(var direction in event.movement) {
+				this.movement[direction] = event.movement[direction]
+			}
 			break
 	}
 }
 
 Player.prototype.update = function(deltatime) {
-	var offset = new THREE.Vector3()
-	offset.copy(this.velocity).multiplyScalar(deltatime)
-	this.position.add(offset)
+	var object = new THREE.Object3D()	// XXX Should be done with math
+	object.position.x = this.position.x
+	object.position.y = this.position.y
+	object.position.z = this.position.z
+	object.rotation.x = this.look.x
+	object.rotation.y = this.look.y
+	object.rotation.z = this.look.z
+	var direction = new THREE.Vector3(
+		this.movement.right - this.movement.left,
+		0,
+		this.movement.back - this.movement.forward
+	)
+	object.translateX(direction.x)
+	object.translateY(direction.y)
+	object.translateZ(direction.z)
+	var change = new THREE.Vector3()
+	change.subVectors(object.position, this.position)
+	change.y = 0 										// No fly
+	change.setLength(PLAYER_SPEED * deltatime)
+	this.position.add(change)
 }
 
 /*
@@ -65,30 +78,31 @@ function PlayerEvent(event, id, version) {
 		case "keydown":
 		case "keyup":
 			var change
-			if(event.type == "keydown") {
-				change = PLAYER_SPEED
+			if(event.type === "keydown") {
+				change = 1
 			} else {
 				change = 0
 			}
-			this.direction = new THREE.Vector3()
+			this.movement = {}
 			switch ( event.keyCode ) {
 				case 38: // up
 				case 87: // w
-					this.direction.z = -change
+					this.movement.forward = change
 					break
 				case 37: // left
 				case 65: // a
-					this.direction.x = -change
+					this.movement.left = change
 					break
 				case 40: // down
 				case 83: // s
-					this.direction.z = change
+					this.movement.back = change
 					break
 				case 39: // right
 				case 68: // d
-					this.direction.x = change
+					this.movement.right = change
 					break
 			}
+			break
 	}
 }
 
