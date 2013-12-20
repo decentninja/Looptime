@@ -87,18 +87,21 @@ function PlayerEvent(event, id, version) {
 			switch ( event.keyCode ) {
 				case 38: // up
 				case 87: // w
+				case 188: // , (for dvorak)
 					this.movement.forward = change
 					break
 				case 37: // left
-				case 65: // a
+				case 65: // a (both for qwerty and dvorak)
 					this.movement.left = change
 					break
 				case 40: // down
 				case 83: // s
+				case 79: // o (for dvorak)
 					this.movement.back = change
 					break
 				case 39: // right
 				case 68: // d
+				case 69: // e (for dvorak)
 					this.movement.right = change
 					break
 			}
