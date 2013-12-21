@@ -35,7 +35,7 @@ function Game() {
 
 Game.prototype.handle = function(event) {
 	if(this.pointerIsLocked) {
-		this.timeline.addEvent(this.time, new PlayerEvent(event, this.controlled.id, this.controlled.version, this.timeline))
+		this.timeline.addEvent(this.playerwave.time, new PlayerEvent(event, this.controlled.id, this.controlled.version, this.timeline))
 	}
 }
 
