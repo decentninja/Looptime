@@ -7,7 +7,7 @@ var SAVE_STATE_RATE = 30		// Save state twice every second
 var TARGET_FRAMERATE = 60
 
 function Game() {
-	this.timeline = new Timeline(SAVE_STATE_RATE, this.ticker)
+	this.timeline = new Timeline(SAVE_STATE_RATE, this.ticker.bind(this))
 	this.pointerIsLocked = false
 	this.time = 0
 	this.deltatime = null
@@ -35,18 +35,33 @@ function Game() {
 
 Game.prototype.handle = function(event) {
 	if(this.pointerIsLocked) {
-		this.timeline.addEvent(this.time, new PlayerEvent(event, this.controlled.id, this.controlled.version))
+		this.timeline.addEvent(this.time, new PlayerEvent(event, this.controlled.id, this.controlled.version, this.jumper.bind(this)))
 	}
+}
+
+Game.prototype.jumper = function(time) {
+	this.controlled.version++
+	return this.timeline.jump(this.playerwave, time)
 }
 
 Game.prototype.ticker = function(state, events) {
 	if(events) {		// Is someone doing something?
 		events.forEach(function(event) {
+			var found = false
 			state.players.forEach(function(player) {
 				if(event.id == player.id && event.version == player.version) {
-					player.evaluate(event)
+					found = player
+					if (event.type !== "jump")
+						player.evaluate(event)
 				}
 			})
+			if (event.type === "jump") {
+				if (found) {
+					this.timeline.ensurePlayerAt(found, event.jumptarget)
+				} else {
+					this.timeline.removePlayerAt(found, event.jumptarget)
+				}
+			}
 		}, this)
 	}
 	state.players.forEach(function(player) {

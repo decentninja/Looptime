@@ -21,13 +21,6 @@ Timewave.prototype.noopTick = function(state) {
 	this.time++
 }
 
-Timewave.prototype.jump = function(time, timeline) {
-	var index = Math.floor(time / timeline.stateFrequency)
-	this.state = deepCopy(timeline.states[index])
-	this.time = index*timeline.stateFrequency
-	return this.time
-}
-
 /*
 	Bookkeeping events, states and waves
  */
@@ -74,8 +67,40 @@ Timeline.prototype.saveState = function(time, state) {
 	this.states[time / this.stateFrequency] = deepCopy(state)
 }
 
-Timeline.prototype.jump = function(time, timewave) {
-	return timewave.jump(time, this)
+Timeline.prototype.ensurePlayerAt = function(player, time) {
+	var state = this.states[time/this.stateFrequency]
+	for (var i = 0; i < state.players.length; i++) {
+		if (state.players[i].id === player.id && state.players[i].version === player.version+1)
+			return
+	}
+	state.players.push(deepCopy(player))
+	state.players[state.players.length-1].version++
+	this.timewaves.forEach(function(wave) {
+		if (wave.time === time)
+			wave.state = deepCopy(state)
+	})
+}
+
+Timeline.prototype.removePlayerAt = function(player, time) {
+	var state = this.states[time/this.stateFrequency]
+	for (var i = 0; i < state.players.length; i++) {
+		if (state.players[i].id === player.id && state.players[i].version === player.version+1) {
+			state.players.splice(i, 1)
+			this.timewaves.forEach(function(wave) {
+				if (wave.time === time)
+					wave.state.players.splice(i, 1)
+			})
+			return
+		}
+	}
+}
+
+Timeline.prototype.jump = function(timewave, time) {
+	index = Math.floor(time/this.stateFrequency)
+	timewave.state = deepCopy(this.states[index])
+	timewave.time = index*this.stateFrequency
+	console.log(timewave)
+	return timewave.time
 }
 
 Timeline.prototype.addEvent = function(time, event) {
@@ -94,7 +119,7 @@ Timeline.prototype.addEvent = function(time, event) {
 Timeline.prototype.addAndReplayEvent = function(time, event, timewave) {
 	this.addEvent(time, event)
 	var tempwave = new Timewave(-1, -1, null)
-	tempwave.jump(time, this)
+	this.jump(time, tempwave)
 	this.sortWaves()
 	var i = 0
 	while (this.timewaves[i] && this.timewaves[i].time <= time)
