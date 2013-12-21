@@ -56,12 +56,9 @@ window.addEventListener('resize', function() {
 	game.activeplayer.camera.updateProjectionMatrix();
 	renderer.setSize( window.innerWidth, window.innerHeight );
 }, false)
-document.addEventListener('mousemove', function(event) {
+function handle(event) {
 	game.handle(event)
-}, false)
-document.addEventListener('keydown', function(event) {
-	game.handle(event)
-}, false)
-document.addEventListener('keyup', function(event) {
-	game.handle(event)
-}, false)
+}
+document.addEventListener('mousemove', handle, false)
+document.addEventListener('keydown', handle, false)
+document.addEventListener('keyup', handle, false)

@@ -103,7 +103,6 @@ Timeline.prototype.jump = function(timewave, time) {
 	index = Math.floor(time/this.stateFrequency)
 	timewave.state = deepCopy(this.states[index])
 	timewave.time = index*this.stateFrequency
-	console.log(timewave)
 	return timewave.time
 }
 

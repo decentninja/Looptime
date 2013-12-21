@@ -106,9 +106,12 @@ function PlayerEvent(event, id, version, timeline) {
 					break
 			}
 			break
+		case "wheel":
+			console.log(event)
+			break
 	}
-	//backspace initiates a jump to 0
-	if (event.type === "keydown" && event.keyCode === 8) {
+	// space initiates a jump to 0
+	if (event.type === "keydown" && event.keyCode === 32) {
 		this.type = "jump"
 		this.jumptarget = timeline.calcJumpTarget(0)
 	}
