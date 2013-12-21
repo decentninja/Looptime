@@ -1,0 +1,30 @@
+-----------
+|         |
+|         |
+|         |
+|         |
+|some kind|
+| of time |
+|   map   |
+|         |
+|         |
+|         |
+|         |
+|         |
+|         |
+|         |
+|         |
+-----------
+----- -----
+| 1 | | 2 |
+----- -----
+
+
+normally:
+1 = shoot
+2 = shield
+
+scrolling puts an arrow next to the map,
+pointing to a time. it moves with scrolling.
+1 = jump to pointed time
+2 = cancel and remove arrow
