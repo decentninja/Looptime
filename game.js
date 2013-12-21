@@ -44,9 +44,9 @@ Game.prototype.ticker = function(state, events) {
 	if(events) {		// Is someone doing something?
 		events.forEach(function(event) {
 			var found = false
-			state.players.forEach(function(player) {
+			state.players.forEach(function(player, index) {
 				if(event.id == player.id && event.version == player.version) {
-					found = player
+					found = index
 					if (event.type === "jump") {
 						if (event.id === that.controlled.id && event.version === that.controlled.version) {
 							that.controlled.version++
@@ -58,10 +58,11 @@ Game.prototype.ticker = function(state, events) {
 				}
 			})
 			if (event.type === "jump") {
-				if (found) {
-					this.timeline.ensurePlayerAt(found, event.jumptarget)
+				if (found !== false) {
+					this.timeline.ensurePlayerAt(state.players[found], event.jumptarget)
+					state.players.splice(found, 1)
 				} else {
-					this.timeline.removePlayerAt(found, event.jumptarget)
+					this.timeline.removePlayerAt(state.players[found], event.jumptarget)
 				}
 			}
 		}, this)
