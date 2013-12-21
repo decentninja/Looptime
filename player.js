@@ -61,7 +61,7 @@ Player.prototype.update = function(deltatime) {
 /*
 	Player event type
  */
-function PlayerEvent(event, id, version, jumper) {
+function PlayerEvent(event, id, version, timeline) {
 	this.id = id
 	this.version = version
 	this.type = event.type
@@ -110,7 +110,7 @@ function PlayerEvent(event, id, version, jumper) {
 	//backspace initiates a jump to 0
 	if (event.type === "keydown" && event.keyCode === 8) {
 		this.type = "jump"
-		this.jumptarget = jumper(0)
+		this.jumptarget = timeline.calcJumpTarget(0)
 	}
 }
 

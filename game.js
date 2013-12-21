@@ -35,24 +35,26 @@ function Game() {
 
 Game.prototype.handle = function(event) {
 	if(this.pointerIsLocked) {
-		this.timeline.addEvent(this.time, new PlayerEvent(event, this.controlled.id, this.controlled.version, this.jumper.bind(this)))
+		this.timeline.addEvent(this.time, new PlayerEvent(event, this.controlled.id, this.controlled.version, this.timeline))
 	}
 }
 
-Game.prototype.jumper = function(time) {
-	this.controlled.version++
-	return this.timeline.jump(this.playerwave, time)
-}
-
 Game.prototype.ticker = function(state, events) {
+	var that = this
 	if(events) {		// Is someone doing something?
 		events.forEach(function(event) {
 			var found = false
 			state.players.forEach(function(player) {
 				if(event.id == player.id && event.version == player.version) {
 					found = player
-					if (event.type !== "jump")
+					if (event.type === "jump") {
+						if (event.id === that.controlled.id && event.version === that.controlled.version) {
+							that.controlled.version++
+							that.timeline.jump(that.playerwave, event.jumptarget)
+						}
+					} else {
 						player.evaluate(event)
+					}
 				}
 			})
 			if (event.type === "jump") {

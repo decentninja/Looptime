@@ -95,6 +95,10 @@ Timeline.prototype.removePlayerAt = function(player, time) {
 	}
 }
 
+Timeline.prototype.calcJumpTarget = function(time) {
+	return Math.floor(time/this.stateFrequency)*this.stateFrequency
+}
+
 Timeline.prototype.jump = function(timewave, time) {
 	index = Math.floor(time/this.stateFrequency)
 	timewave.state = deepCopy(this.states[index])
