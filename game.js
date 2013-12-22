@@ -53,7 +53,7 @@ Game.prototype.handle = function(event) {
 				if(this.timecursor < 0) {
 					this.timecursor = 0
 				}
-				var max = this.timeline.states.length * SAVE_STATE_RATE
+				var max = this.timeline.states.length * SAVE_STATE_RATE - 1
 				if(this.timecursor > max) {
 					this.timecursor = max
 				}
