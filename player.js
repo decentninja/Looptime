@@ -128,6 +128,20 @@ function PlayerModel(id, version) {
 	gun.position.x = 1
 	gun.position.z = -2
 	gun.rotation.x = - Math.PI / 2
+
+	var textGeo = new THREE.TextGeometry( this.version, {
+		size: 80,
+		height: 20,
+		curveSegments: 2,
+		font: "optimer"
+	})
+	var textMesh = new THREE.Mesh(textGeo)
+	textMesh.scale.multiplyScalar(0.002)
+	textMesh.position.y = 0.4
+	textMesh.position.x = -0.5
+	textMesh.position.z = 0.35
+	textMesh.rotation.x = 1.3
+	gun.add(textMesh)
 }
 
 PlayerModel.prototype = Object.create(THREE.Object3D.prototype)
