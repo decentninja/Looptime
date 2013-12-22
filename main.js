@@ -65,4 +65,11 @@ document.addEventListener('keyup', handle, false)
 document.addEventListener('wheel', function(event) {
 	event.preventDefault()
 	handle(event)
-}, false)
+}, false)function message(msg) {
+	var info = document.querySelector(".cross .info")
+	info.innerHTML = msg
+	info.style.opacity = 1
+	setTimeout(function() {
+		info.style.opacity = 0
+	}, 1000)
+}

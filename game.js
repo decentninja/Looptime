@@ -57,7 +57,6 @@ Game.prototype.handle = function(event) {
 				if(temp !== this.timecursor) {
 					this.timecursor = temp
 				}
-				internalEvent.jumptarget = this.timecursor
 				console.log(this.timecursor)
 				return 		// Don't register in timeline
 			case "keydown":

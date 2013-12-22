@@ -4,4 +4,10 @@
 	left: 50%;
 	opacity: 0.6;
 	fill-color: white;
+	font-size: 80%;
+}
+
+.cross .info {
+	opacity: 0;
+	transition: opacity 0.5s;
 }
