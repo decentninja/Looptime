@@ -65,7 +65,7 @@ document.addEventListener('keyup', handle, false)
 document.addEventListener('wheel', function(event) {
 	event.preventDefault()
 	handle(event)
-	message(game.timecursor)
+	message(game.timeline.calcJumpTarget(game.timecursor))
 }, false)
 
 function message(msg) {

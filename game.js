@@ -44,7 +44,12 @@ Game.prototype.handle = function(event) {
 		internalEvent.version = this.controlled.version
 		switch(event.type) {
 			case "wheel":
-				this.timecursor -= event.wheelDelta
+				console.log(this.timecursor)
+				if (event.wheelDelta) {
+					this.timecursor -= event.wheelDelta
+				} else if (event.deltaY) {
+					this.timecursor -= event.deltaY
+				}
 				if(this.timecursor < 0) {
 					this.timecursor = 0
 				}
@@ -52,16 +57,11 @@ Game.prototype.handle = function(event) {
 				if(this.timecursor > max) {
 					this.timecursor = max
 				}
-				// If close enough, snap to state position
-				var temp = this.timeline.calcJumpTarget(this.timecursor)
-				if(temp !== this.timecursor) {
-					this.timecursor = temp
-				}
 				return 		// Don't register in timeline
 			case "keydown":
 				if (event.keyCode === 32) {
 					internalEvent.type = "jump"
-					internalEvent.jumptarget = this.timecursor
+					internalEvent.jumptarget = this.timeline.calcJumpTarget(this.timecursor)
 				}
 				break
 		}
@@ -92,7 +92,7 @@ Game.prototype.ticker = function(state, events) {
 					this.timeline.ensurePlayerAt(state.players[found], event.jumptarget)
 					state.players.splice(found, 1)
 				} else {
-					this.timeline.removePlayerAt(state.players[found], event.jumptarget)
+					this.timeline.removePlayerAt({id: event.id, version: event.version}, event.jumptarget)
 				}
 			}
 		}, this)
