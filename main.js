@@ -65,7 +65,10 @@ document.addEventListener('keyup', handle, false)
 document.addEventListener('wheel', function(event) {
 	event.preventDefault()
 	handle(event)
-}, false)function message(msg) {
+	message(game.timecursor)
+}, false)
+
+function message(msg) {
 	var info = document.querySelector(".cross .info")
 	info.innerHTML = msg
 	info.style.opacity = 1
