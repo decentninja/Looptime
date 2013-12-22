@@ -44,9 +44,7 @@ document.addEventListener('pointerlockchange', pointerlockchange, false)
 document.addEventListener('mozpointerlockchange', pointerlockchange, false)
 document.addEventListener('webkitpointerlockchange', pointerlockchange, false)
 document.addEventListener("click", function(event) {
-	if(game.pointerIsLocked) {
-		game.handle(event)
-	} else {
+	if(!game.pointerIsLocked) {
 		el.requestPointerLock = el.requestPointerLock || el.mozRequestPointerLock || el.webkitRequestPointerLock
 		el.requestPointerLock()
 	}
@@ -62,6 +60,8 @@ function handle(event) {
 document.addEventListener('mousemove', handle, false)
 document.addEventListener('keydown', handle, false)
 document.addEventListener('keyup', handle, false)
+document.addEventListener('mousedown', handle, false)
+document.addEventListener('mouseup', handle, false)
 document.addEventListener('wheel', function(event) {
 	event.preventDefault()
 	handle(event)

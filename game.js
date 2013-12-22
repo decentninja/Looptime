@@ -70,24 +70,61 @@ Game.prototype.handle = function(event) {
 }
 
 Game.prototype.ticker = function(state, events) {
-	var that = this
 	if(events) {		// Is someone doing something?
 		events.forEach(function(event) {
 			var found = false
 			state.players.forEach(function(player, index) {
 				if(event.id == player.id && event.version == player.version) {
 					found = index
-					if (event.type === "jump") {
-						if (event.id === that.controlled.id && event.version === that.controlled.version) {
-							that.controlled.version++
-							that.timeline.jump(that.playerwave, event.jumptarget)
-						}
-					} else {
-						player.evaluate(event)
+					switch(event.type) {
+						case "jump":
+							if (event.id === this.controlled.id && event.version === this.controlled.version) {
+								this.controlled.version++
+								this.timeline.jump(this.playerwave, event.jumptarget)
+							}
+							break
+						case "fire":
+							var debugline = new THREE.Geometry()
+							debugline.vertices.push(player.position)
+							var d = new THREE.Object3D()
+							d.position.x = player.position.x
+							d.position.y = player.position.y
+							d.position.z = player.position.z
+							d.rotation.x = player.look.x
+							d.rotation.y = player.look.y
+							d.rotation.z = player.look.z
+							d.translateZ(-1000)
+							debugline.vertices.push(d.position)
+							this.scene.add(new THREE.Line(debugline, new THREE.LineBasicMaterial({
+								color: 0x0000ff,
+								linewidth: 10
+							})))
+							d.position.sub(player.position)
+
+							var ray = new THREE.Raycaster()
+							ray.set(player.position, player.look)
+
+							// Collect meshes
+							var targets = []
+							function add(playerModel) {
+								if(!(playerModel.id === player.id && playerModel.version === player.version)) {
+									targets.push(playerModel.body)
+								}
+							}
+							function find(playerVersions) {
+								playerVersions.children.forEach(add)
+							}
+							this.playerModels.children.forEach(find)
+							console.log(targets)
+							var hit = ray.intersectObjects(targets, false)
+							console.log("hit: ", hit)
+							break
+						default:
+							player.evaluate(event)
 					}
 				}
-			})
-			if (event.type === "jump") {
+			}, this)
+			if(event.type === "jump") {
 				if (found !== false) {
 					this.timeline.ensurePlayerAt(state.players[found], event.jumptarget)
 					state.players.splice(found, 1)
@@ -120,11 +157,11 @@ Game.prototype.update = function() {
 	}, this)
 	this.playerwave.state.players.forEach(function(player) {
 		var versions = this.playerModels.children.filter(function(differentversions) {
-			return differentversions.gameid === player.id
+			return differentversions.id === player.id
 		}, this)[0]
 		if(!versions) {
 			versions = new THREE.Object3D()
-			versions.gameid = player.id
+			versions.id = player.id
 			this.playerModels.add(versions)
 		}
 		var version = versions.children.filter(function(version) {

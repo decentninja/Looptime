@@ -2,7 +2,7 @@
 	Player state at one tick
  */
 function Player(id) {
-	this.position = new THREE.Vector3(0, 4, 0)
+	this.position = new THREE.Vector3(0, 0, 0)
 	this.movement = {
 		forward: 0,
 		back: 0,
@@ -12,6 +12,7 @@ function Player(id) {
 	this.look = new THREE.Vector3()
 	this.id = id
 	this.version = 0
+	this.shieldUp = false
 }
 
 /*
@@ -19,8 +20,9 @@ function Player(id) {
  */
 Player.prototype.evaluate = function(event) {
 	switch(event.type) {
-		case "click":
-			console.log("TODO Fire gun!")
+		case "shield":
+			this.shieldUp = event.change
+			console.log("shield", this.shieldUp ? "up" : "down")
 			break
 		case "mousemove":
 			this.look.x += event.mouse.x
@@ -37,23 +39,17 @@ Player.prototype.evaluate = function(event) {
 
 Player.prototype.update = function(deltatime) {
 	var object = new THREE.Object3D()	// XXX Should be done with math
-	object.position.x = this.position.x
+	object.position.x = this.position.x 	// Only way to keep quaternion
 	object.position.y = this.position.y
 	object.position.z = this.position.z
 	object.rotation.x = this.look.x
 	object.rotation.y = this.look.y
 	object.rotation.z = this.look.z
-	var direction = new THREE.Vector3(
-		this.movement.right - this.movement.left,
-		0,
-		this.movement.back - this.movement.forward
-	)
-	object.translateX(direction.x)
-	object.translateY(direction.y)
-	object.translateZ(direction.z)
+	object.translateX(this.movement.right - this.movement.left)
+	object.translateZ(this.movement.back - this.movement.forward)
 	var change = new THREE.Vector3()
 	change.subVectors(object.position, this.position)
-	change.y = 0 										// No fly
+	change.y = 0 					// No fly
 	change.setLength(PLAYER_SPEED * deltatime)
 	this.position.add(change)
 }
@@ -70,8 +66,22 @@ function PlayerEvent(event) {
 			this.mouse.x = event.movementY || event.mozMovementY || event.webkitMovementY || 0
 			this.mouse.multiplyScalar(-0.002)
 			break
-		case "click":
-			// TODO What button
+		case "mouseup":
+			if(event.button == 2) {
+				this.type = "shield"
+				this.change = false
+			}
+			break
+		case "mousedown":
+			switch(event.button) {
+				case 0:
+					this.type = "fire"
+					break
+				case 2:
+					this.type = "shield"
+					this.change = true
+					break
+			}
 			break
 		case "keydown":
 		case "keyup":
@@ -147,7 +157,7 @@ function PlayerModel(id, version) {
 PlayerModel.prototype = Object.create(THREE.Object3D.prototype)
 
 PlayerModel.prototype.update = function(playerstate) {
-	this.body.position = playerstate.position
-	this.body.rotation.y = playerstate.look.y
+	this.position = playerstate.position
+	this.rotation.y = playerstate.look.y
 	this.camera.rotation.x = playerstate.look.x
 }
