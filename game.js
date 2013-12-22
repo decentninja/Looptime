@@ -30,12 +30,44 @@ function Game() {
 		version: 0
 	}
 	this.activeplayer = null
+	this.timecursor = 0
 	this.update()		// Create model and camera for first frame
 }
 
+/*
+	World and client specific event here, put player handling in player.js.
+*/
 Game.prototype.handle = function(event) {
-	if(this.pointerIsLocked) {
-		this.timeline.addEvent(this.playerwave.time, new PlayerEvent(event, this.controlled.id, this.controlled.version, this.timeline))
+	if (this.pointerIsLocked) {
+		var internalEvent = new PlayerEvent(event)
+		internalEvent.id = this.controlled.id,
+		internalEvent.version = this.controlled.version
+		switch(event.type) {
+			case "wheel":
+				this.timecursor -= event.wheelDelta
+				if(this.timecursor < 0) {
+					this.timecursor = 0
+				}
+				var max = this.timeline.states.length * SAVE_STATE_RATE
+				if(this.timecursor > max) {
+					this.timecursor = max
+				}
+				// If close enough, snap to state position
+				var temp = this.timeline.calcJumpTarget(this.timecursor)
+				if(temp !== this.timecursor) {
+					this.timecursor = temp
+				}
+				internalEvent.jumptarget = this.timecursor
+				console.log(this.timecursor)
+				return 		// Don't register in timeline
+			case "keydown":
+				if (event.keyCode === 32) {
+					internalEvent.type = "jump"
+					internalEvent.jumptarget = this.timecursor
+				}
+				break
+		}
+		this.timeline.addEvent(this.playerwave.time, internalEvent)
 	}
 }
 

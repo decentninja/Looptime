@@ -62,3 +62,7 @@ function handle(event) {
 document.addEventListener('mousemove', handle, false)
 document.addEventListener('keydown', handle, false)
 document.addEventListener('keyup', handle, false)
+document.addEventListener('wheel', function(event) {
+	event.preventDefault()
+	handle(event)
+}, false)

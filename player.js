@@ -61,9 +61,7 @@ Player.prototype.update = function(deltatime) {
 /*
 	Player event type
  */
-function PlayerEvent(event, id, version, timeline) {
-	this.id = id
-	this.version = version
+function PlayerEvent(event) {
 	this.type = event.type
 	switch(event.type) {
 		case "mousemove":
@@ -106,14 +104,6 @@ function PlayerEvent(event, id, version, timeline) {
 					break
 			}
 			break
-		case "wheel":
-			console.log(event)
-			break
-	}
-	// space initiates a jump to 0
-	if (event.type === "keydown" && event.keyCode === 32) {
-		this.type = "jump"
-		this.jumptarget = timeline.calcJumpTarget(0)
 	}
 }
 
