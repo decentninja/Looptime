@@ -27,6 +27,12 @@ Player.prototype.evaluate = function(event) {
 		case "mousemove":
 			this.look.x += event.mouse.x
 			this.look.y += event.mouse.y
+			var max = Math.PI/2
+			if(this.look.x < -max) {
+				this.look.x = -max
+			} else if(this.look.x > max) {
+				this.look.x = max
+			}
 			break
 		case "keydown":
 		case "keyup":
