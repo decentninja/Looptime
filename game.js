@@ -13,6 +13,8 @@ function Game() {
 	this.deltatime = null
 	this.realtime = performance.now()
 
+	this.delayedJumpers = []
+
 	this.scene = new THREE.Scene()
 	this.map = new Lobby(this.scene)
 	this.scene.add(this.map)
@@ -25,7 +27,7 @@ function Game() {
 	}
 	this.playerwave = new Timewave(-1, 1, initialState)
 	this.timeline.timewaves.push(this.playerwave)
-	this.controlled = {
+	this.controlled = { //TODO: replace with one per player + a controlledId
 		id: 0,
 		version: 0
 	}
@@ -83,7 +85,7 @@ Game.prototype.ticker = function(state, events, latestAcceptableTime) {
 						case "jump":
 							if (event.id === this.controlled.id && event.version === this.controlled.version) {
 								this.controlled.version++
-								this.timeline.jump(this.playerwave, event.jumptarget)
+								this.delayedJumpers.push([event.jumptarget, this.playerwave])
 							}
 							break
 						case "fire":
@@ -150,6 +152,12 @@ Game.prototype.update = function() {
 	for(var i = 0; i <= this.deltatime; i += 1000/TARGET_FRAMERATE) {	// Catch up
 		this.time++
 		this.timeline.tick()
+		if (this.delayedJumpers.length > 0) {
+			this.delayedJumpers.forEach(function(info) {
+				this.timeline.jump(info[1], info[0])
+			}, this)
+			this.delayedJumpers.length = 0
+		}
 	}
 
 	// Add new players, timeclones and update old players
