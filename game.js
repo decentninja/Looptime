@@ -40,6 +40,7 @@ function Game() {
 Game.prototype.handle = function(event) {
 	if (this.pointerIsLocked) {
 		var internalEvent = new PlayerEvent(event)
+		internalEvent.metatime = this.time //used to determine the age of player events, for properly syncing timewaves
 		internalEvent.id = this.controlled.id,
 		internalEvent.version = this.controlled.version
 		switch(event.type) {
@@ -69,9 +70,11 @@ Game.prototype.handle = function(event) {
 	}
 }
 
-Game.prototype.ticker = function(state, events) {
+Game.prototype.ticker = function(state, events, latestAcceptableTime) {
 	if(events) {		// Is someone doing something?
 		events.forEach(function(event) {
+			if (typeof latestAcceptableTime === "number" && event.metatime > latestAcceptableTime)
+				return
 			var found = false
 			state.players.forEach(function(player, index) {
 				if(event.id == player.id && event.version == player.version) {

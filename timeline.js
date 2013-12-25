@@ -113,11 +113,11 @@ Timeline.prototype.addEvent = function(time, event) {
 	this.events[time].push(event)
 }
 
+//TODO: enable this function to mass-insert events
 /*
-	This has the potential to cause temporary desyncs when
-	a playerwave is overrun by a faster timewave when we're
-	playing on a network. The magnitude of the desync should
-	be relative to the latency between the players.
+	This function assumes that all input-generating waves are
+	at either the same point in time or with a distance of at
+	least latency, as well as travelling at the same speed.
 */
 Timeline.prototype.addAndReplayEvent = function(time, event, timewave) {
 	this.addEvent(time, event)
@@ -127,11 +127,44 @@ Timeline.prototype.addAndReplayEvent = function(time, event, timewave) {
 	var i = 0
 	while (this.timewaves[i] && this.timewaves[i].time <= time)
 		i++
+	//i points to the first timewave that may be affected
+
+	var j = i
+	while (this.timewaves[j] && this.timewaves[j].time <= timewave.time)
+		j++
+	//j points to the first timewave after the supplied timewave
+
+	var branchpoints = []
+	var s = timewave
+	while (this.timewaves[j]) {
+		var f = this.timewaves[j]
+		var branchpoint = Math.floor(p.time + p.speed*(f.time - p.time)/(p.speed - f.speed))
+		if (branchpoint >= time) {
+			if (!branchpoints[branchpoint])
+				branchpoints[branchpoint] = []
+			branchpoints[branchpoint].push(f)
+		}
+		j++
+	}
+
 	while (tempwave.time < timewave.time) {
 		tempwave.tick(this.events[tempwave.time], this.ticker)
+
+		//update the state of all passed waves
 		while (this.timewaves[i] && this.timewaves[i].time == time) {
 			this.timewaves[i].state = deepCopy(tempwave.state)
 			i++
+		}
+
+		//update the state of all waves that overtook timewave at this time
+		if (branchpoints[tempwave.time]) {
+			branchpoints[tempwave.time].forEach(function(f) {
+				var twave = deepCopy(tempwave)
+				var metatimeFilter = event.metatime + tempwave.time - time
+				while (twave.time < f.time)
+					twave.tick(this.events[twave.time], this.ticker, metatimeFilter)
+				f.state = twave.state
+			}, this)
 		}
 	}
 }

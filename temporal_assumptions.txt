@@ -1,0 +1,3 @@
+when syncing over a network:
+- input-generating waves should be at the same time or with a delta > latency
+- input-generating waves should have the same speed
