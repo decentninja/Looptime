@@ -168,6 +168,12 @@ Game.prototype.update = function() {
 	var deltatime = temptime - this.realtime
 	this.realtime = temptime
 
+	this.advanceTimelineAndJump()
+
+	this.updateGraphics()
+}
+
+Game.prototype.advanceTimelineAndJump = function() {
 	for(var i = 0; i <= this.deltatime; i += 1000/TARGET_FRAMERATE) {	// Catch up
 		this.time++
 		this.timeline.tick()
@@ -178,13 +184,17 @@ Game.prototype.update = function() {
 			this.delayedJumpers.length = 0
 		}
 	}
+}
 
-	// Add new players, timeclones and update old players
+Game.prototype.updateGraphics = function() {
+	//Reset alive book-keeping
 	this.playerModels.children.forEach(function(players) {
 		players.children.forEach(function(model) {
-			model.alive = false		// Reset existed-before bookkeeping
+			model.alive = false
 		}, this)
 	}, this)
+
+	// Add new players, timeclones and update old players
 	this.playerwave.state.players.forEach(function(player) {
 		var versions = this.playerModels.children.filter(function(differentversions) {
 			return differentversions.id === player.id
@@ -205,6 +215,7 @@ Game.prototype.update = function() {
 		version.alive = true		// Model is new or existed before and in state	
 	}, this)
 
+	// Remove models that were not alive and move the camera
 	this.playerModels.children.forEach(function(models) {
 		var toberemoved = []
 		models.children.forEach(function(model) {
