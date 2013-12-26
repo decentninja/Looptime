@@ -8,8 +8,8 @@ function Timewave(time, speed, state) {
 	this.state = deepCopy(state)
 }
 
-Timewave.prototype.tick = function(events, ticker) {
-	ticker(this.state, events)
+Timewave.prototype.tick = function(events, ticker, sendmess) {
+	ticker(this.time, this.state, events, this.sendmess)
 	this.ticksDoneThisTick++
 	this.time++
 }
@@ -24,12 +24,13 @@ Timewave.prototype.noopTick = function(state) {
 /*
 	Bookkeeping events, states and waves
  */
-function Timeline(stateFrequency, ticker) {
+function Timeline(stateFrequency, ticker, sendmess) {
 	this.timewaves = []
 	this.events = []    // IMPROV Prealocate for performance?
 	this.states = []
 	this.stateFrequency = stateFrequency
 	this.ticker = ticker
+	this.sendmess = sendmess
 }
 
 /*
@@ -42,7 +43,7 @@ Timeline.prototype.tick = function() {
 	})
 	this.timewaves.forEach(function(tickerwave, ti) {
 		while (tickerwave.ticksDoneThisTick < tickerwave.speed) {
-			tickerwave.tick(this.events[tickerwave.time], this.ticker)
+			tickerwave.tick(this.events[tickerwave.time], this.ticker, this.sendmess)
 			for (var i = ti + 1; i < this.timewaves.length; i++) {
 				if (this.timewaves[i].time === tickerwave.time - 1 && this.timewaves[i].ticksDoneThisTick < this.timewaves[i].speed) {
 					this.timewaves[i].noopTick(tickerwave.state)
@@ -150,7 +151,7 @@ Timeline.prototype.addAndReplayEvent = function(time, event, timewave) {
 	}
 
 	while (tempwave.time < timewave.time) {
-		tempwave.tick(this.events[tempwave.time], this.ticker)
+		tempwave.tick(this.events[tempwave.time], this.ticker, this.sendmess)
 
 		//update the state of all passed waves
 		while (this.timewaves[i] && this.timewaves[i].time == time) {
@@ -164,7 +165,7 @@ Timeline.prototype.addAndReplayEvent = function(time, event, timewave) {
 				var twave = deepCopy(tempwave)
 				var metatimeFilter = event.metatime + tempwave.time - time
 				while (twave.time < f.time)
-					twave.tick(this.events[twave.time], this.ticker, metatimeFilter)
+					twave.tick(this.events[twave.time], this.ticker, this.sendmess, metatimeFilter)
 				f.state = twave.state
 			}, this)
 		}

@@ -7,7 +7,9 @@ var SAVE_STATE_RATE = 30		// Save state twice every second
 var TARGET_FRAMERATE = 60
 
 function Game() {
-	this.timeline = new Timeline(SAVE_STATE_RATE, this.ticker.bind(this))
+	this.sendmess = new SendMessage() //it feels a lot like the graphics stuff should be split out of game
+	this.sendmess.register(this)
+	this.timeline = new Timeline(SAVE_STATE_RATE, this.ticker.bind(this), this.sendmess)
 	this.pointerIsLocked = false
 	this.time = 0
 	this.deltatime = null
@@ -72,13 +74,13 @@ Game.prototype.handleInput = function(event) {
 	}
 }
 
-Game.prototype.ticker = function(state, events, latestAcceptableTime) {
+Game.prototype.ticker = function(time, state, events, sendmess, latestAcceptableTime) {
 	if(events) {		// Is someone doing something?
 		events.forEach(function(event) {
 			if (typeof latestAcceptableTime === "number" && event.metatime > latestAcceptableTime)
 				return
 
-			this.handleEvent(state, event, latestAcceptableTime)
+			this.handleEvent(time, state, event, sendmess, latestAcceptableTime)
 		}, this)
 	}
 	state.players.forEach(function(player) {
@@ -86,7 +88,7 @@ Game.prototype.ticker = function(state, events, latestAcceptableTime) {
 	})
 }
 
-Game.prototype.handleEvent = function(state, event, latestAcceptableTime) {
+Game.prototype.handleEvent = function(time, state, event, sendmess, latestAcceptableTime) {
 	var found = false
 	for (var index = 0; index < state.players.length; index++) {
 		player = state.players[index]
@@ -97,15 +99,15 @@ Game.prototype.handleEvent = function(state, event, latestAcceptableTime) {
 
 		switch(event.type) {
 			case "jump":
-				this.handleJumpEvent(event)
+				this.handleJumpEvent(time, event, sendmess)
 				break
 
 			case "fire":
-				this.handleFireEvent(state, event)
+				this.handleFireEvent(time, state, event, sendmess)
 				break
 
 			default:
-				player.evaluate(event)
+				player.evaluate(time, event, sendmess)
 		}
 		break //each event only deals with one player, so break here
 	}
@@ -119,14 +121,14 @@ Game.prototype.handleEvent = function(state, event, latestAcceptableTime) {
 	}
 }
 
-Game.prototype.handleJumpEvent = function(event) {
+Game.prototype.handleJumpEvent = function(time, event, sendmess) {
 	if (event.id === this.controlled.id && event.version === this.controlled.version) {
 		this.controlled.version++
 		this.delayedJumpers.push([event.jumptarget, this.playerwave])
 	}
 }
 
-Game.prototype.handleFireEvent = function(state, event) {
+Game.prototype.handleFireEvent = function(time, state, event, sendmess) {
 	//TODO: actual math.
 	/*
 		assuming

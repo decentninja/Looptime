@@ -19,7 +19,7 @@ function Player(id) {
 /*
 	Event handling
  */
-Player.prototype.evaluate = function(event) {
+Player.prototype.evaluate = function(time, event, sendmess) {
 	switch(event.type) {
 		case "shield":
 			this.shieldUp = event.change
