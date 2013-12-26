@@ -152,26 +152,21 @@ Game.prototype.handleFireEvent = function(state, event) {
 		face the origin and check for collision, but it's slightly more complex
 	*/
 	var debugline = new THREE.Geometry()
-	debugline.vertices.push(player.position)
-	var d = new THREE.Object3D()
-	d.position.x = player.position.x
-	d.position.y = player.position.y
-	d.position.z = player.position.z
-	d.rotation.x = player.look.x
-	d.rotation.y = player.look.y
-	d.rotation.z = player.look.z
-	d.translateZ(-1000)
-	debugline.vertices.push(d.position)
+	var gun = new THREE.Vector3(0, 8.8, 0)
+	gun.add(player.position)
+	debugline.vertices.push(gun)
+	debugline.vertices.push(player.getLookDirection().setLength(1000))
 	this.scene.add(new THREE.Line(debugline, new THREE.LineBasicMaterial({
 		color: 0x0000ff,
-		linewidth: 10
+		linewidth: 5,
+		transparent: true,
+		opacity: 0.5
 	})))
-	d.position.sub(player.position)
 
+	// FIXME Should not use models. 
 	var ray = new THREE.Raycaster()
-	ray.set(player.position, player.look)
+	ray.set(gun, player.getLookDirection())
 
-	// Collect meshes
 	var targets = []
 	function add(playerModel) {
 		if(!(playerModel.id === player.id && playerModel.version === player.version)) {
@@ -182,9 +177,10 @@ Game.prototype.handleFireEvent = function(state, event) {
 		playerVersions.children.forEach(add)
 	}
 	this.playerModels.children.forEach(find)
-	console.log(targets)
 	var hit = ray.intersectObjects(targets, false)
-	console.log("hit: ", hit)
+	if(hit.length != 0) {
+		console.log("hit: ", hit[0].object.parent)
+	}
 }
 
 Game.prototype.update = function() {
