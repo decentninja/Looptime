@@ -155,7 +155,7 @@ Game.prototype.handleFireEvent = function(state, event) {
 	var gun = new THREE.Vector3(0, 8.8, 0)
 	gun.add(player.position)
 	debugline.vertices.push(gun)
-	debugline.vertices.push(player.getLookDirection().setLength(1000))
+	debugline.vertices.push(player.getLookDirection().multiplyScalar(1000).add(gun))
 	this.scene.add(new THREE.Line(debugline, new THREE.LineBasicMaterial({
 		color: 0x0000ff,
 		linewidth: 5,
