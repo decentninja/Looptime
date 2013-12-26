@@ -55,7 +55,7 @@ window.addEventListener('resize', function() {
 	renderer.setSize( window.innerWidth, window.innerHeight );
 }, false)
 function handle(event) {
-	game.handle(event)
+	game.handleInput(event)
 }
 document.addEventListener('mousemove', handle, false)
 document.addEventListener('keydown', handle, false)

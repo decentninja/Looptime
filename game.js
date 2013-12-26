@@ -39,7 +39,7 @@ function Game() {
 /*
 	World and client specific event here, put player handling in player.js.
 */
-Game.prototype.handle = function(event) {
+Game.prototype.handleInput = function(event) {
 	if (this.pointerIsLocked) {
 		var internalEvent = new PlayerEvent(event)
 		internalEvent.metatime = this.time //used to determine the age of player events, for properly syncing timewaves
@@ -47,7 +47,6 @@ Game.prototype.handle = function(event) {
 		internalEvent.version = this.controlled.version
 		switch(event.type) {
 			case "wheel":
-				console.log(this.timecursor)
 				if (event.wheelDelta) {
 					this.timecursor -= event.wheelDelta
 				} else if (event.deltaY) {
@@ -61,6 +60,7 @@ Game.prototype.handle = function(event) {
 					this.timecursor = max
 				}
 				return 		// Don't register in timeline
+
 			case "keydown":
 				if (event.keyCode === 32) {
 					internalEvent.type = "jump"
@@ -77,71 +77,90 @@ Game.prototype.ticker = function(state, events, latestAcceptableTime) {
 		events.forEach(function(event) {
 			if (typeof latestAcceptableTime === "number" && event.metatime > latestAcceptableTime)
 				return
-			var found = false
-			state.players.forEach(function(player, index) {
-				if(event.id == player.id && event.version == player.version) {
-					found = index
-					switch(event.type) {
-						case "jump":
-							if (event.id === this.controlled.id && event.version === this.controlled.version) {
-								this.controlled.version++
-								this.delayedJumpers.push([event.jumptarget, this.playerwave])
-							}
-							break
-						case "fire":
-							var debugline = new THREE.Geometry()
-							debugline.vertices.push(player.position)
-							var d = new THREE.Object3D()
-							d.position.x = player.position.x
-							d.position.y = player.position.y
-							d.position.z = player.position.z
-							d.rotation.x = player.look.x
-							d.rotation.y = player.look.y
-							d.rotation.z = player.look.z
-							d.translateZ(-1000)
-							debugline.vertices.push(d.position)
-							this.scene.add(new THREE.Line(debugline, new THREE.LineBasicMaterial({
-								color: 0x0000ff,
-								linewidth: 10
-							})))
-							d.position.sub(player.position)
 
-							var ray = new THREE.Raycaster()
-							ray.set(player.position, player.look)
-
-							// Collect meshes
-							var targets = []
-							function add(playerModel) {
-								if(!(playerModel.id === player.id && playerModel.version === player.version)) {
-									targets.push(playerModel.body)
-								}
-							}
-							function find(playerVersions) {
-								playerVersions.children.forEach(add)
-							}
-							this.playerModels.children.forEach(find)
-							console.log(targets)
-							var hit = ray.intersectObjects(targets, false)
-							console.log("hit: ", hit)
-							break
-						default:
-							player.evaluate(event)
-					}
-				}
-			}, this)
-			if(event.type === "jump") {
-				if (found !== false) {
-					this.timeline.ensurePlayerAt(state.players[found], event.jumptarget)
-					state.players.splice(found, 1)
-				} else {
-					this.timeline.removePlayerAt({id: event.id, version: event.version}, event.jumptarget)
-				}
-			}
+			this.handleEvent(state, event, latestAcceptableTime)
 		}, this)
 	}
 	state.players.forEach(function(player) {
 		player.update(1000/TARGET_FRAMERATE)
 	})
+}
+
+Game.prototype.handleEvent = function(state, event, latestAcceptableTime) {
+	var found = false
+	for (var index = 0; index < state.players.length; index++) {
+		player = state.players[index]
+
+		if (event.id !== player.id || event.version !== player.version)
+			continue
+		found = index
+
+		switch(event.type) {
+			case "jump":
+				this.handleJumpEvent(event)
+				break
+
+			case "fire":
+				this.handleFireEvent(state, event)
+				break
+
+			default:
+				player.evaluate(event)
+		}
+		break //each event only deals with one player, so break here
+	}
+	if(event.type === "jump") {
+		if (found !== false) {
+			this.timeline.ensurePlayerAt(state.players[found], event.jumptarget)
+			state.players.splice(found, 1)
+		} else {
+			this.timeline.removePlayerAt({id: event.id, version: event.version}, event.jumptarget)
+		}
+	}
+}
+
+Game.prototype.handleJumpEvent = function(event) {
+	if (event.id === this.controlled.id && event.version === this.controlled.version) {
+		this.controlled.version++
+		this.delayedJumpers.push([event.jumptarget, this.playerwave])
+	}
+}
+
+Game.prototype.handleFireEvent = function(state, event) {
+	var debugline = new THREE.Geometry()
+	debugline.vertices.push(player.position)
+	var d = new THREE.Object3D()
+	d.position.x = player.position.x
+	d.position.y = player.position.y
+	d.position.z = player.position.z
+	d.rotation.x = player.look.x
+	d.rotation.y = player.look.y
+	d.rotation.z = player.look.z
+	d.translateZ(-1000)
+	debugline.vertices.push(d.position)
+	this.scene.add(new THREE.Line(debugline, new THREE.LineBasicMaterial({
+		color: 0x0000ff,
+		linewidth: 10
+	})))
+	d.position.sub(player.position)
+
+	var ray = new THREE.Raycaster()
+	ray.set(player.position, player.look)
+
+	// Collect meshes
+	var targets = []
+	function add(playerModel) {
+		if(!(playerModel.id === player.id && playerModel.version === player.version)) {
+			targets.push(playerModel.body)
+		}
+	}
+	function find(playerVersions) {
+		playerVersions.children.forEach(add)
+	}
+	this.playerModels.children.forEach(find)
+	console.log(targets)
+	var hit = ray.intersectObjects(targets, false)
+	console.log("hit: ", hit)
 }
 
 Game.prototype.update = function() {
