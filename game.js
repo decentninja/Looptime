@@ -127,6 +127,30 @@ Game.prototype.handleJumpEvent = function(event) {
 }
 
 Game.prototype.handleFireEvent = function(state, event) {
+	//TODO: actual math.
+	/*
+		assuming
+		c = sphere center point (vector)
+		r = radius of sphere
+		o = starting point of line (vector)
+		l = normalized direction of line (vector)
+
+		then
+
+		temp = (l * (o - c))^2 - (o - c)^2 + r^2
+		temp < 0 => no intersection
+		dist = -(l * (o - c)) - sqrt(temp)
+
+		where dist is the distance to the closest intersection
+		(assuming collision in front of character and point of origin
+		not inside sphere)
+
+		see wikipedia for more info
+	*/
+	/*
+		could also make characters boxes, find the faces of the box that
+		face the origin and check for collision, but it's slightly more complex
+	*/
 	var debugline = new THREE.Geometry()
 	debugline.vertices.push(player.position)
 	var d = new THREE.Object3D()
