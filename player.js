@@ -9,7 +9,8 @@ function Player(id) {
 		left: 0,
 		right: 0
 	}
-	this.look = new THREE.Vector3()
+	this.look = new THREE.Euler()
+	this.look.reorder("YXZ")
 	this.id = id
 	this.version = 0
 	this.shieldUp = false
@@ -43,20 +44,26 @@ Player.prototype.evaluate = function(event) {
 	}
 }
 
+Player.prototype.getLookDirection = function() {
+	var direction = new THREE.Vector3(0, 0, -1)		// The camera is looking down internaly
+	var quaternion = new THREE.Quaternion()
+	quaternion.setFromEuler(this.look)
+	direction.applyQuaternion(quaternion)
+	direction.normalize()
+	return direction
+}
+
 Player.prototype.update = function(deltatime) {
-	var object = new THREE.Object3D()	// XXX Should be done with math
-	object.position.x = this.position.x 	// Only way to keep quaternion
-	object.position.y = this.position.y
-	object.position.z = this.position.z
-	object.rotation.x = this.look.x
-	object.rotation.y = this.look.y
-	object.rotation.z = this.look.z
-	object.translateX(this.movement.right - this.movement.left)
-	object.translateZ(this.movement.back - this.movement.forward)
-	var change = new THREE.Vector3()
-	change.subVectors(object.position, this.position)
-	change.y = 0 					// No fly
+	var change = new THREE.Vector3(
+		this.movement.right - this.movement.left,
+		0,
+		this.movement.back - this.movement.forward
+	)
+	var quaternion = new THREE.Quaternion()
+	quaternion.setFromEuler(this.look)
+	change.applyQuaternion(quaternion)
 	change.setLength(PLAYER_SPEED * deltatime)
+	change.y = 0 		// No fly
 	this.position.add(change)
 }
 
