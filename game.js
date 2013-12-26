@@ -206,13 +206,17 @@ Game.prototype.update = function() {
 	}, this)
 
 	this.playerModels.children.forEach(function(models) {
+		var toberemoved = []
 		models.children.forEach(function(model) {
 			if(!model.alive) {
-				models.remove(model)		// Remove models that did exist and does not in this state
+				toberemoved.push(model)
 			}
 			if(this.controlled.id === model.id && this.controlled.version === model.version) {
 				this.activeplayer = model 	// Switch camera if nessesary
 			}
 		}, this)
+		toberemoved.forEach(function(model) {
+			models.remove(model)
+		})
 	}, this)
 }
