@@ -73,6 +73,7 @@ Timeline.prototype.ensurePlayerAt = function(time, player) {
 		if (state.players[i].id === player.id && state.players[i].version === player.version+1)
 			return
 	}
+	console.log("jump "+player.id+":("+player.version+"->"+(player.version+1)+") changed to success")
 	state.players.push(deepCopy(player))
 	state.players[state.players.length-1].version++
 	this.timewaves.forEach(function(wave) {
@@ -85,6 +86,7 @@ Timeline.prototype.removePlayerAt = function(time, player) {
 	var state = this.states[time/this.stateFrequency]
 	for (var i = 0; i < state.players.length; i++) {
 		if (state.players[i].id === player.id && state.players[i].version === player.version+1) {
+			console.log("jump "+player.id+":("+player.version+"->"+(player.version+1)+") changed to failure")
 			state.players.splice(i, 1)
 			this.timewaves.forEach(function(wave) {
 				if (wave.time === time)
