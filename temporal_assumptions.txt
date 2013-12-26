@@ -2,3 +2,4 @@ when syncing over a network:
 - input-generating waves should be at the same time or with a delta > latency
 - input-generating waves should have the same speed
 - not sure about what happens when a remote player jumps, need to think about it more
+  * easiest way to solve it is probably to make jumps take a while, at least latency from activation to it happening
