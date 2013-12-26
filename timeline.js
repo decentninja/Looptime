@@ -67,7 +67,7 @@ Timeline.prototype.saveState = function(time, state) {
 	this.states[time / this.stateFrequency] = deepCopy(state)
 }
 
-Timeline.prototype.ensurePlayerAt = function(player, time) {
+Timeline.prototype.ensurePlayerAt = function(time, player) {
 	var state = this.states[time/this.stateFrequency]
 	for (var i = 0; i < state.players.length; i++) {
 		if (state.players[i].id === player.id && state.players[i].version === player.version+1)
@@ -81,7 +81,7 @@ Timeline.prototype.ensurePlayerAt = function(player, time) {
 	})
 }
 
-Timeline.prototype.removePlayerAt = function(player, time) {
+Timeline.prototype.removePlayerAt = function(time, player) {
 	var state = this.states[time/this.stateFrequency]
 	for (var i = 0; i < state.players.length; i++) {
 		if (state.players[i].id === player.id && state.players[i].version === player.version+1) {
@@ -99,7 +99,7 @@ Timeline.prototype.calcJumpTarget = function(time) {
 	return Math.floor(time/this.stateFrequency)*this.stateFrequency
 }
 
-Timeline.prototype.jump = function(timewave, time) {
+Timeline.prototype.jump = function(time, timewave) {
 	index = Math.floor(time/this.stateFrequency)
 	timewave.state = deepCopy(this.states[index])
 	timewave.time = index*this.stateFrequency

@@ -111,10 +111,10 @@ Game.prototype.handleEvent = function(state, event, latestAcceptableTime) {
 	}
 	if(event.type === "jump") {
 		if (found !== false) {
-			this.timeline.ensurePlayerAt(state.players[found], event.jumptarget)
+			this.timeline.ensurePlayerAt(event.jumptarget, state.players[found])
 			state.players.splice(found, 1)
 		} else {
-			this.timeline.removePlayerAt({id: event.id, version: event.version}, event.jumptarget)
+			this.timeline.removePlayerAt(event.jumptarget, {id: event.id, version: event.version})
 		}
 	}
 }
@@ -179,7 +179,7 @@ Game.prototype.advanceTimelineAndJump = function() {
 		this.timeline.tick()
 		if (this.delayedJumpers.length > 0) {
 			this.delayedJumpers.forEach(function(info) {
-				this.timeline.jump(info[1], info[0])
+				this.timeline.jump(info[0], info[1])
 			}, this)
 			this.delayedJumpers.length = 0
 		}
