@@ -8,8 +8,8 @@ function Timewave(time, speed, state) {
 	this.state = deepCopy(state)
 }
 
-Timewave.prototype.tick = function(events, ticker, metatimeFilter) {
-	ticker.tick(this.time, this.state, events, metatimeFilter)
+Timewave.prototype.tick = function(events, arrivals, ticker, metatimeFilter) {
+	ticker.tick(this.time, this.state, events, arrivals, metatimeFilter)
 	this.ticksDoneThisTick++
 	this.time++
 }
@@ -27,6 +27,7 @@ Timewave.prototype.noopTick = function(state) {
 function Timeline(stateFrequency, sendmess) {
 	this.timewaves = []
 	this.events = []    // IMPROV Prealocate for performance?
+	this.arrivals = []
 	this.states = []
 	this.stateFrequency = stateFrequency
 	this.sendmess = sendmess
@@ -42,7 +43,7 @@ Timeline.prototype.tick = function(ticker) {
 	})
 	this.timewaves.forEach(function(tickerwave, ti) {
 		while (tickerwave.ticksDoneThisTick < tickerwave.speed) {
-			tickerwave.tick(this.events[tickerwave.time], ticker)
+			tickerwave.tick(this.events[tickerwave.time], this.arrivals[tickerwave.time], ticker)
 			for (var i = ti + 1; i < this.timewaves.length; i++) {
 				if (this.timewaves[i].time === tickerwave.time - 1 && this.timewaves[i].ticksDoneThisTick < this.timewaves[i].speed) {
 					this.timewaves[i].noopTick(tickerwave.state)
@@ -68,30 +69,29 @@ Timeline.prototype.saveState = function(time, state) {
 }
 
 Timeline.prototype.ensurePlayerAt = function(time, player) {
-	var state = this.states[time/this.stateFrequency]
-	for (var i = 0; i < state.players.length; i++) {
-		if (state.players[i].id === player.id && state.players[i].version === player.version+1)
-			return
+	var player = deepCopy(player)
+	player.version++
+	if (!this.arrivals[time])
+		this.arrivals[time] = []
+	for (var i = 0; i < this.arrivals[time].length; i++) {
+		p = this.arrivals[time][i]
+		if (p.id !== player.id || p.version !== player.version)
+			continue
+		this.arrivals[time][i] = player
+		return
 	}
 	console.log("jump "+player.id+":("+player.version+"->"+(player.version+1)+") changed to success")
-	state.players.push(deepCopy(player))
-	state.players[state.players.length-1].version++
-	this.timewaves.forEach(function(wave) {
-		if (wave.time === time)
-			wave.state = deepCopy(state)
-	})
+	this.arrivals[time].push(player)
 }
 
 Timeline.prototype.removePlayerAt = function(time, player) {
-	var state = this.states[time/this.stateFrequency]
-	for (var i = 0; i < state.players.length; i++) {
-		if (state.players[i].id === player.id && state.players[i].version === player.version+1) {
+	if (!this.arrivals[time])
+		return
+	for (var i = 0; i < this.arrivals[time].length; i++) {
+		var p = this.arrivals[time][i]
+		if (p.id === player.id && p.version === player.version) {
+			this.arrivals[time].splice(i, 1)
 			console.log("jump "+player.id+":("+player.version+"->"+(player.version+1)+") changed to failure")
-			state.players.splice(i, 1)
-			this.timewaves.forEach(function(wave) {
-				if (wave.time === time)
-					wave.state.players.splice(i, 1)
-			})
 			return
 		}
 	}
@@ -150,7 +150,7 @@ Timeline.prototype.addAndReplayEvent = function(time, event, timewave, ticker) {
 	}
 
 	while (tempwave.time < timewave.time) {
-		tempwave.tick(this.events[tempwave.time], ticker)
+		tempwave.tick(this.events[tempwave.time], this.arrivals[tempwave.time], ticker)
 
 		//update the state of all passed waves
 		while (this.timewaves[i] && this.timewaves[i].time == time) {
@@ -164,7 +164,7 @@ Timeline.prototype.addAndReplayEvent = function(time, event, timewave, ticker) {
 				var twave = deepCopy(tempwave)
 				var metatimeFilter = event.metatime + tempwave.time - time
 				while (twave.time < f.time)
-					twave.tick(this.events[twave.time], ticker, metatimeFilter)
+					twave.tick(this.events[twave.time], this.arrivals[tempwave.time], ticker, metatimeFilter)
 				f.state = twave.state
 			}, this)
 		}
