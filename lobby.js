@@ -3,13 +3,14 @@
 	With code from http://threejs.org/examples/#misc_controls_pointerlock
  */
 
-function Lobby(scene) {
+function Lobby() {
+	THREE.Object3D.call(this)
 	// Light
 	var pointLight = new THREE.PointLight(0xFFFFFF)
 	pointLight.position.x = 10
 	pointLight.position.y = 50
 	pointLight.position.z = 130
-	scene.add(pointLight)
+	this.add(pointLight)
 
 	// Sphere
 	var sphereMaterial =
@@ -19,7 +20,7 @@ function Lobby(scene) {
 	var sphere = new THREE.Mesh(
 		new THREE.SphereGeometry(50, 16, 16), sphereMaterial)
 	sphere.position.z = -300
-	scene.add(sphere)
+	this.add(sphere)
 
 	// Floor
 	geometry = new THREE.PlaneGeometry( 2000, 2000, 100, 100 );
@@ -38,5 +39,14 @@ function Lobby(scene) {
 	}
 	material = new THREE.MeshBasicMaterial( { vertexColors: THREE.VertexColors } )
 	mesh = new THREE.Mesh( geometry, material )
-	scene.add(mesh)
+	this.add(mesh)
+
+	// Collition test cube
+	this.testcube = new THREE.Mesh(new THREE.CubeGeometry(20, 20, 50))
+	this.testcube.position.y = 10
+	this.testcube.position.x = 30
+	this.testcube.material.side = THREE.DoubleSide
+	this.add(this.testcube)
 }
+
+Lobby.prototype = Object.create(THREE.Object3D.prototype)

@@ -18,7 +18,7 @@ function Game() {
 	this.delayedJumpers = []
 
 	this.scene = new THREE.Scene()
-	this.map = new Lobby(this.scene)
+	this.map = new Lobby()
 	this.scene.add(this.map)
 	this.playerModels = new THREE.Object3D()	// Object3D of Object3D's (players) of PlayerModels (versions)
 	this.scene.add(this.playerModels)
@@ -84,8 +84,8 @@ Game.prototype.ticker = function(time, state, events, sendmess, latestAcceptable
 		}, this)
 	}
 	state.players.forEach(function(player) {
-		player.update(1000/TARGET_FRAMERATE)
-	})
+		player.update(1000/TARGET_FRAMERATE, this.map)
+	}, this)
 }
 
 Game.prototype.handleEvent = function(time, state, event, sendmess, latestAcceptableTime) {

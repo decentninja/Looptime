@@ -53,7 +53,7 @@ Player.prototype.getLookDirection = function() {
 	return direction
 }
 
-Player.prototype.update = function(deltatime) {
+Player.prototype.update = function(deltatime, map) {
 	var change = new THREE.Vector3(
 		this.movement.right - this.movement.left,
 		0,
@@ -62,8 +62,36 @@ Player.prototype.update = function(deltatime) {
 	var quaternion = new THREE.Quaternion()
 	quaternion.setFromEuler(this.look)
 	change.applyQuaternion(quaternion)
-	change.setLength(PLAYER_SPEED * deltatime)
+	
 	change.y = 0 		// No fly
+	change.normalize()
+
+	var ray = new THREE.Raycaster(this.position, new THREE.Vector3(), 0, 5)
+
+	var dirs = [
+        new THREE.Vector3(0, 0, 1),
+        new THREE.Vector3(1, 0, 1),
+        new THREE.Vector3(1, 0, 0),
+        new THREE.Vector3(1, 0, -1),
+        new THREE.Vector3(0, 0, -1),
+        new THREE.Vector3(-1, 0, -1),
+        new THREE.Vector3(-1, 0, 0),
+        new THREE.Vector3(-1, 0, 1)
+	]
+	change.setLength(PLAYER_SPEED * deltatime)
+	dirs.forEach(function(dir) {
+		ray.set(this.position, dir)
+		var col = ray.intersectObject(map.testcube, false)
+		if(col.length !== 0) {
+			if(dir.x) {
+				dir.multiplyScalar(Math.abs(change.x))
+			}
+			if(dir.z) {
+				dir.multiplyScalar(Math.abs(change.z))
+			}
+			change.sub(dir)
+		}
+	}, this)
 	this.position.add(change)
 }
 
@@ -134,7 +162,7 @@ function PlayerEvent(event) {
 	Player model data
  */
 function PlayerModel(id, version) {
-	THREE.Object3D.call( this );
+	THREE.Object3D.call(this)
 	this.id = id
 	this.version = version
 	this.body = new THREE.Mesh(new THREE.CubeGeometry(5, 10, 5))
