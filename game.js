@@ -91,7 +91,7 @@ Game.prototype.ticker = function(time, state, events, sendmess, latestAcceptable
 Game.prototype.handleEvent = function(time, state, event, sendmess, latestAcceptableTime) {
 	var found = false
 	for (var index = 0; index < state.players.length; index++) {
-		player = state.players[index]
+		var player = state.players[index]
 
 		if (event.id !== player.id || event.version !== player.version)
 			continue
@@ -103,7 +103,7 @@ Game.prototype.handleEvent = function(time, state, event, sendmess, latestAccept
 				break
 
 			case "fire":
-				this.handleFireEvent(time, state, event, sendmess)
+				this.handleFireEvent(time, state, player, sendmess)
 				break
 
 			default:
@@ -128,7 +128,7 @@ Game.prototype.handleJumpEvent = function(time, event, sendmess) {
 	}
 }
 
-Game.prototype.handleFireEvent = function(time, state, event, sendmess) {
+Game.prototype.handleFireEvent = function(time, state, player, sendmess) {
 	//TODO: actual math.
 	/*
 		assuming
