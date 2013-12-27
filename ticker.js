@@ -107,7 +107,7 @@ Ticker.prototype.handleFireEvent = function(time, state, player) {
 //    color: 0x0000ff,
 //    linewidth: 5,
 //    transparent: true,
-//    opacity: 0.5
+//    opacity: 0.5       // Will be filled by clone
 //  })))
 
   var ray = new THREE.Raycaster()

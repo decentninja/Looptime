@@ -24,6 +24,11 @@ var pointerlockchange = function ( event ) {
 	}
 }
 
+var canvas = document.querySelector(".map > canvas")
+var ctx = canvas.getContext("2d")
+canvas.width = canvas.clientWidth
+canvas.height = canvas.clientHeight
+
 var game = null				// Game logic scope
 function enterGame(name) {
 	// TODO websocket setup, password logon and map loading etc
@@ -33,6 +38,8 @@ function update() {
 	requestAnimationFrame(update)
 	if(!debug || debug && game.pointerIsLocked) {		// Pause on mouse blur while not debugging
 		game.update()
+		ctx.clearRect(0, 0, canvas.width, canvas.height)
+		game.updateMap(ctx, canvas.width, canvas.height)
 		renderer.render(game.scene, game.activeplayer.camera)
 	}
 }
@@ -53,6 +60,8 @@ window.addEventListener('resize', function() {
 	game.activeplayer.camera.aspect = window.innerWidth / window.innerHeight;
 	game.activeplayer.camera.updateProjectionMatrix();
 	renderer.setSize( window.innerWidth, window.innerHeight );
+	canvas.width = canvas.clientWidth
+	canvas.height = canvas.clientHeight
 }, false)
 function handle(event) {
 	game.handleInput(event)
@@ -65,7 +74,6 @@ document.addEventListener('mouseup', handle, false)
 document.addEventListener('wheel', function(event) {
 	event.preventDefault()
 	handle(event)
-	message(game.timeline.calcJumpTarget(game.timecursor))
 }, false)
 
 function message(msg) {
