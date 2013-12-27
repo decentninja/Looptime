@@ -153,6 +153,9 @@ Game.prototype.handleFireEvent = function(time, state, event, sendmess) {
 		could also make characters boxes, find the faces of the box that
 		face the origin and check for collision, but it's slightly more complex
 	*/
+	/*
+		Will use this until we see preformance problems
+	 */
 	var debugline = new THREE.Geometry()
 	var gun = new THREE.Vector3(0, 8.8, 0)
 	gun.add(player.position)
@@ -165,23 +168,23 @@ Game.prototype.handleFireEvent = function(time, state, event, sendmess) {
 		opacity: 0.5
 	})))
 
-	// FIXME Should not use models. 
 	var ray = new THREE.Raycaster()
 	ray.set(gun, player.getLookDirection())
 
 	var targets = []
-	function add(playerModel) {
-		if(!(playerModel.id === player.id && playerModel.version === player.version)) {
-			targets.push(playerModel.body)
+	state.players.forEach(function(other) {
+		if(!(player.id === other.id && player.version === other.version)) {
+			// Everyone except the shooter
+			var model = new PlayerModel(other.id, other.version)
+			model.update(other)
+			model.updateMatrixWorld()
+			targets.push(model.body)
 		}
-	}
-	function find(playerVersions) {
-		playerVersions.children.forEach(add)
-	}
-	this.playerModels.children.forEach(find)
+	})
+
 	var hit = ray.intersectObjects(targets, false)
-	if(hit.length != 0) {
-		console.log("hit: ", hit[0].object.parent)
+	if(hit.length !== 0) {
+		console.log("hit", hit[0].object.parent)
 	}
 }
 
