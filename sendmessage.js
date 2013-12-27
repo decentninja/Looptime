@@ -8,9 +8,8 @@
 
   For example
   when a shot is fired the timewave should call
-  sendmessinstance.send("fired shot", function() {
-    return {x: <x>, y: <y>, dist: <dist calculation>}
-  }, this)
+  sendmessinstance.send("onShotFired", {x: <x>, y: <y>, dist: <dist calculation>})
+  or something similar
 */
 
 function SendMessage(timewave) {
@@ -26,19 +25,18 @@ SendMessage.prototype.register = function(receiver) {
   time - the time from which the message is sent
          if it is negative the message is always sent
   name - the name of the function to be called
-  argFunc - a function that will be evaluated to provide arguments
-         to the receiver if required. Will only evaluate once.
-  argThis - the object to be considered this while evaluating argFunc
+  arg  - the argument to supply to the receiver
 */
-SendMessage.prototype.send = function(time, name, argFunc, argThis) {
+SendMessage.prototype.send = function(time, name, arg) {
   if (time !== this.timewave.time && time >= 0)
     return
-  var arg
+  var received = false
   this.receivers.forEach(function(receiver) {
     if (typeof receiver[name] !== "function")
       return
-    if (!arg)
-      arg = argFunc.call(argThis)
-    receiver.call(receiver, arg)
+    received = true
+    receiver[name].call(receiver, arg)
   })
+  if (!received)
+    console.warn("No receiver for message '"+name+"'")
 }
