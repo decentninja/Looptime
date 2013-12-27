@@ -5,13 +5,17 @@
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
+		<div class="map">
+			<canvas></canvas>
+		</div>
 		<div class="cross">
 			<svg height="10" width="10">
 				<circle cx="5" cy="5" r="5" />
 			</svg>
-			<span class="info">0:0</span>
+			<span class="info"></span>
 		</div>
 		<canvas id="game"></canvas>
+
 		<script src="lib/three.js"></script>
 		<script src="lib/optimer_regular.typeface.js"></script>
 		<script src="lib/deepcopy.js"></script>
