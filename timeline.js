@@ -43,7 +43,7 @@ Timeline.prototype.tick = function(ticker) {
 	})
 	this.timewaves.forEach(function(tickerwave, ti) {
 		while (tickerwave.ticksDoneThisTick < tickerwave.speed) {
-			tickerwave.tick(this.events[tickerwave.time], this.arrivals[tickerwave.time], ticker)
+			tickerwave.tick(this.events[tickerwave.time], this.arrivals[tickerwave.time+1], ticker)
 			for (var i = ti + 1; i < this.timewaves.length; i++) {
 				if (this.timewaves[i].time === tickerwave.time - 1 && this.timewaves[i].ticksDoneThisTick < this.timewaves[i].speed) {
 					this.timewaves[i].noopTick(tickerwave.state)
@@ -71,6 +71,7 @@ Timeline.prototype.saveState = function(time, state) {
 Timeline.prototype.ensurePlayerAt = function(time, player) {
 	var player = deepCopy(player)
 	player.version++
+	this.states[Math.floor(time/this.stateFrequency)].players.push(deepCopy(player))
 	if (!this.arrivals[time])
 		this.arrivals[time] = []
 	for (var i = 0; i < this.arrivals[time].length; i++) {
@@ -150,7 +151,7 @@ Timeline.prototype.addAndReplayEvent = function(time, event, timewave, ticker) {
 	}
 
 	while (tempwave.time < timewave.time) {
-		tempwave.tick(this.events[tempwave.time], this.arrivals[tempwave.time], ticker)
+		tempwave.tick(this.events[tempwave.time], this.arrivals[tempwave.time+1], ticker)
 
 		//update the state of all passed waves
 		while (this.timewaves[i] && this.timewaves[i].time == time) {
@@ -164,7 +165,7 @@ Timeline.prototype.addAndReplayEvent = function(time, event, timewave, ticker) {
 				var twave = deepCopy(tempwave)
 				var metatimeFilter = event.metatime + tempwave.time - time
 				while (twave.time < f.time)
-					twave.tick(this.events[twave.time], this.arrivals[tempwave.time], ticker, metatimeFilter)
+					twave.tick(this.events[twave.time], this.arrivals[tempwave.time+1], ticker, metatimeFilter)
 				f.state = twave.state
 			}, this)
 		}
