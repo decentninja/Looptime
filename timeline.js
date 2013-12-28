@@ -80,7 +80,7 @@ Timeline.prototype.ensurePlayerAt = function(time, player) {
 		this.arrivals[time][i] = player
 		return
 	}
-	console.log("jump "+player.id+":("+player.version+"->"+(player.version+1)+") changed to success")
+	console.log("jump "+player.id+":("+(player.version-1)+"->"+player.version+") changed to success")
 	this.arrivals[time].push(player)
 }
 
@@ -89,7 +89,7 @@ Timeline.prototype.removePlayerAt = function(time, player) {
 		return
 	for (var i = 0; i < this.arrivals[time].length; i++) {
 		var p = this.arrivals[time][i]
-		if (p.id === player.id && p.version === player.version) {
+		if (p.id === player.id && p.version === player.version+1) {
 			this.arrivals[time].splice(i, 1)
 			console.log("jump "+player.id+":("+player.version+"->"+(player.version+1)+") changed to failure")
 			return

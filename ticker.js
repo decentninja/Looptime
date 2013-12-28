@@ -129,11 +129,21 @@ Ticker.prototype.handleFireEvent = function(time, state, player) {
 
   var hit = ray.intersectObjects(targets, false)
   if(hit.length !== 0) { //todo: check colliion with obstacles
-    console.log("hit", hit[0].object.parent)
+    var targetModel = hit[0].object.parent
+    console.log("hit", targetModel)
+    var target
+    var i
+    for (i = 0; i < state.players.length; i++) {
+      target = state.players[i]
+      if (target.id === targetModel.id && target.version === targetModel.version)
+        break
+    }
     this.sendmess.send(time, "onHit", {
       player: player,
-      target: hit[0].object.parent,
+      target: target,
     })
+    state.players.splice(i, 1)
+  } else {
+    this.sendmess.send(time, "onMiss", player)
   }
-  this.sendmess.send(time, "onMiss", player)
 }
