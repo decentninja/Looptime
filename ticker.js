@@ -17,7 +17,7 @@ Ticker.prototype.doDelayedJumps = function() {
 
 Ticker.prototype.tick = function(time, state, events, arrivals, latestAcceptableTime) {
   if (arrivals) {
-    state.players.push.apply(state.players, arrivals)
+    state.players.push.apply(state.players, deepCopy(arrivals))
   }
   if (events) {    // Is someone doing something?
     events.forEach(function(event) {
