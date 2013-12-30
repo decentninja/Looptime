@@ -38,5 +38,5 @@ SendMessage.prototype.send = function(time, name, arg) {
     receiver[name].call(receiver, arg)
   })
   if (!received)
-    console.warn("No receiver for message '"+name+"'")
+    console.warn("No receiver for message", name, arg)
 }
