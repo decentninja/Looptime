@@ -1,3 +1,7 @@
+var TIMEJUMP_DELAY = 120 //roughly 2 seconds
+
+var foundDuplicates = false
+
 function Ticker(map, timeline, sendmess) {
   this.map = map
   this.timeline = timeline
@@ -15,10 +19,7 @@ Ticker.prototype.doDelayedJumps = function() {
   }
 }
 
-Ticker.prototype.tick = function(time, state, events, arrivals, latestAcceptableTime) {
-  if (arrivals) {
-    state.players.push.apply(state.players, deepCopy(arrivals))
-  }
+Ticker.prototype.tick = function(time, state, events, latestAcceptableTime) {
   if (events) {    // Is someone doing something?
     events.forEach(function(event) {
       if (typeof latestAcceptableTime === "number" && event.metatime > latestAcceptableTime)
@@ -30,20 +31,28 @@ Ticker.prototype.tick = function(time, state, events, arrivals, latestAcceptable
   state.players.forEach(function(player) {
     player.update(1000/TARGET_FRAMERATE, this.map)
   }, this)
+  state.jumptimers.forEach(function(timer) {
+    timer.timeLeft--
+    if (timer.timeLeft > 0)
+      return
+
+    this.handleJump(time, state, timer)
+  }, this)
+  state.jumptimers = state.jumptimers.filter(function(timer) {
+    return timer.timeLeft > 0
+  })
 }
 
 Ticker.prototype.handleEvent = function(time, state, event) {
-  var found = false
   for (var index = 0; index < state.players.length; index++) {
     var player = state.players[index]
 
     if (event.id !== player.id || event.version !== player.version)
       continue
-    found = index
 
     switch(event.type) {
       case "jump":
-        this.handleJumpEvent(time, event)
+        this.handleJumpEvent(time, state, event)
         break
 
       case "fire":
@@ -53,24 +62,51 @@ Ticker.prototype.handleEvent = function(time, state, event) {
       default:
         player.evaluate(time, event, this.sendmess)
     }
-    break //each event only deals with one player, so break here
-  }
-  if(event.type === "jump") {
-    if (found !== false) {
-      this.timeline.ensurePlayerAt(event.jumptarget, state.players[found])
-      state.players.splice(found, 1)
-    } else {
-      this.timeline.removePlayerAt(event.jumptarget, {id: event.id, version: event.version})
-    }
+    return //each event only deals with one player, so return here
   }
 }
 
-Ticker.prototype.handleJumpEvent = function(time, event) {
-  if (this.controlled[event.id].version === event.version) {
-    this.controlled[event.id].version++
-    this.delayedJumpers.push([event.jumptarget, this.controlled[event.id].timewave])
-    this.sendmess.send(-1, "onNewJumpSuccessful", event.id)
+Ticker.prototype.handleJumpEvent = function(time, state, event) {
+  state.jumptimers.push({
+    id: event.id,
+    version: event.version,
+    jumptarget: event.jumptarget,
+    timeLeft: TIMEJUMP_DELAY,
+  })
+  this.sendmess.send(time, "onJumpInitiated", {
+    id: event.id,
+    version: event.version,
+    jumptarget: event.jumptarget,
+  })
+}
+
+Ticker.prototype.handleJump = function(time, state, timer) {
+  for (var i = 0; i < state.players.length; i++) {
+    var player = state.players[i]
+    if (player.id !== timer.id || player.version !== timer.version)
+      continue
+
+    if (this.controlled[timer.id].version === timer.version) {
+      this.controlled[timer.id].version++
+      this.delayedJumpers.push([timer.jumptarget, this.controlled[timer.id].timewave])
+      this.sendmess.send(-1, "onNewJumpSuccessful", timer.id)
+    }
+    this.timeline.ensurePlayerAt(timer.jumptarget, player)
+    state.players.splice(i, 1)
+    this.sendmess.send(time, "onJumpSuccessful", {
+      id: timer.id,
+      version: timer.version,
+      jumptarget: timer.jumptarget,
+    })
+    return
   }
+
+  this.timeline.removePlayerAt(timer.jumptarget, timer)
+  this.sendmess.send(time, "onJumpFailure", {
+    id: timer.id,
+    version: timer.version,
+    jumptarget: timer.jumptarget,
+  })
 }
 
 Ticker.prototype.handleFireEvent = function(time, state, player) {

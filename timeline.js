@@ -1,3 +1,6 @@
+var TIMEWAVE_SNAP = 240 //roughly 4 seconds
+var TIMEWAVE_SNAP_SPEED = 1 //the speed of the timewaves to snap to
+
 /*
 	Propagation of change though the timeline
  */
@@ -9,7 +12,9 @@ function Timewave(time, speed, state) {
 }
 
 Timewave.prototype.tick = function(events, arrivals, ticker, metatimeFilter) {
-	ticker.tick(this.time, this.state, events, arrivals, metatimeFilter)
+	if (arrivals)
+		this.state.players.push.apply(this.state.players, arrivals)
+	ticker.tick(this.time, this.state, events, metatimeFilter)
 	this.ticksDoneThisTick++
 	this.time++
 }
@@ -71,7 +76,6 @@ Timeline.prototype.saveState = function(time, state) {
 Timeline.prototype.ensurePlayerAt = function(time, player) {
 	var player = deepCopy(player)
 	player.version++
-	this.states[Math.floor(time/this.stateFrequency)].players.push(deepCopy(player))
 	if (!this.arrivals[time])
 		this.arrivals[time] = []
 	for (var i = 0; i < this.arrivals[time].length; i++) {
@@ -98,13 +102,22 @@ Timeline.prototype.removePlayerAt = function(time, player) {
 	}
 }
 
-Timeline.prototype.calcJumpTarget = function(time) {
+Timeline.prototype.calcJumpTarget = function(time, metatimeOffset) {
+	for (var i = 0; i < this.timewaves.length; i++) {
+		var wave = this.timewaves[i]
+		if (wave.speed === TIMEWAVE_SNAP_SPEED && Math.abs(wave.time - time) < TIMEWAVE_SNAP) {
+			return wave.time + metatimeOffset*wave.speed
+		}
+	}
 	return Math.floor(time/this.stateFrequency)*this.stateFrequency
 }
 
 Timeline.prototype.jump = function(time, timewave) {
 	index = Math.floor(time/this.stateFrequency)
 	timewave.state = deepCopy(this.states[index])
+  if (this.arrivals[time]) {
+    timewave.state.players.push.apply(timewave.state.players, deepCopy(this.arrivals[time]))
+  }
 	timewave.time = index*this.stateFrequency
 	return timewave.time
 }

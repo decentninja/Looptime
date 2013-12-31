@@ -28,7 +28,8 @@ function Game() {
 
 	// Initialize controlled player
 	var initialState = {
-		players: [new Player(0)]
+		players: [new Player(0)],
+		jumptimers: [],
 	}
 	this.playerwave = new Timewave(-1, 1, initialState)
 	this.sendmess.timewave = this.playerwave
@@ -72,7 +73,7 @@ Game.prototype.handleInput = function(event) {
 			case "keydown":
 				if (event.keyCode === 32) {
 					internalEvent.type = "jump"
-					internalEvent.jumptarget = this.timeline.calcJumpTarget(this.timecursor)
+					internalEvent.jumptarget = this.timeline.calcJumpTarget(this.timecursor, TIMEJUMP_DELAY)
 				}
 				break
 		}
@@ -186,8 +187,9 @@ Game.prototype.updateMap = function(ctx, width, height) {
 	})
 
 	// Paint waves and cursor
+	var timeline = this.timeline
 	function marker(time) {
-		var position = (width-10) * time / totaltime
+		var position = (width-10) * timeline.calcJumpTarget(time, 0) / totaltime
 		ctx.fillStyle = "black"
 		ctx.fillRect(position, 0, 2, height-12)
 		ctx.textAlign = "center"
