@@ -1,7 +1,7 @@
 /*
 	Player state at one tick
  */
-function Player(id) {
+function Player(id, version) {
 	this.position = new THREE.Vector3(0, 0, 0)
 	this.movement = {
 		forward: 0,
@@ -12,7 +12,7 @@ function Player(id) {
 	this.look = new THREE.Euler()
 	this.look.reorder("YXZ")
 	this.id = id
-	this.version = 0
+	this.version = version | 0
 	this.shieldUp = false
 }
 

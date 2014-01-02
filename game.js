@@ -4,14 +4,19 @@
 
 var PLAYER_SPEED = 0.1
 var SAVE_STATE_RATE = 30		// Save state twice every second
+var SAVE_STATE_COUNT = 600  // A timeline of 5 min
 var TARGET_FRAMERATE = 60
 
 function Game() {
+	var initialState = {
+		players: [],
+		jumptimers: [],
+	}
 	this.sendmess = new SendMessage() //it feels a lot like the graphics stuff should be split out of game
 	this.sendmess.register(this)
 	this.map = new Lobby()
 
-	this.timeline = new Timeline(SAVE_STATE_RATE, this.sendmess)
+	this.timeline = new Timeline(SAVE_STATE_COUNT, SAVE_STATE_RATE, initialState, this.sendmess)
 	this.ticker = new Ticker(this.map, this.timeline, this.sendmess)
 
 	this.pointerIsLocked = false
@@ -27,10 +32,6 @@ function Game() {
 	this.scene.add(this.playerModels)
 
 	// Initialize controlled player
-	var initialState = {
-		players: [new Player(0)],
-		jumptimers: [],
-	}
 	this.playerwave = new Timewave(-1, 1, initialState)
 	this.sendmess.timewave = this.playerwave
 	this.timeline.timewaves.push(this.playerwave)
@@ -42,6 +43,11 @@ function Game() {
 	}]
 	this.activeplayer = null
 	this.timecursor = 0
+
+	var startTime = this.timeline.calcJumpTarget(SAVE_STATE_COUNT * SAVE_STATE_RATE / 2)
+	this.timeline.ensurePlayerAt(startTime, new Player(0, -1))
+	this.timeline.jump(startTime, this.playerwave)
+
 	this.update()		// Create model and camera for first frame
 }
 

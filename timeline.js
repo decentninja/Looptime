@@ -29,11 +29,14 @@ Timewave.prototype.noopTick = function(state) {
 /*
 	Bookkeeping events, states and waves
  */
-function Timeline(stateFrequency, sendmess) {
+function Timeline(stateCount, stateFrequency, initialState, sendmess) {
 	this.timewaves = []
 	this.events = []    // IMPROV Prealocate for performance?
 	this.arrivals = []
-	this.states = []
+	this.states = new Array(stateCount)
+	for (var i = 0; i < this.states.length; i++)
+		this.states[i] = initialState
+	this.stateCount = stateCount
 	this.stateFrequency = stateFrequency
 	this.sendmess = sendmess
 }
@@ -49,8 +52,8 @@ Timeline.prototype.tick = function(ticker) {
 	this.timewaves.forEach(function(tickerwave, ti) {
 		while (tickerwave.ticksDoneThisTick < tickerwave.speed) {
 			tickerwave.tick(this.events[tickerwave.time], this.arrivals[tickerwave.time+1], ticker)
-			for (var i = ti + 1; i < this.timewaves.length; i++) {
-				if (this.timewaves[i].time === tickerwave.time - 1 && this.timewaves[i].ticksDoneThisTick < this.timewaves[i].speed) {
+			for (var i = ti + 1; i < this.timewaves.length && this.timewaves[i].time === tickerwave.time - 1; i++) {
+				if (this.timewaves[i].ticksDoneThisTick < this.timewaves[i].speed) {
 					this.timewaves[i].noopTick(tickerwave.state)
 				}
 			}
@@ -66,11 +69,12 @@ Timeline.prototype.sortWaves = function() {
 }
 
 Timeline.prototype.saveState = function(time, state) {
-	if (time % this.stateFrequency !== 0) {
+	var index = time / this.stateFrequency
+	if (index > this.stateCount || index !== index|0) {
 		return
 	}
 
-	this.states[time / this.stateFrequency] = deepCopy(state)
+	this.states[index] = deepCopy(state)
 }
 
 Timeline.prototype.ensurePlayerAt = function(time, player) {
