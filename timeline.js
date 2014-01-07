@@ -14,7 +14,7 @@ function Timewave(speed, snap, wraparound) {
 
 Timewave.prototype.tick = function(events, arrivals, ticker, metatimeFilter) {
 	if (arrivals)
-		this.state.players.push.apply(this.state.players, arrivals)
+		this.state.players.push.apply(this.state.players, deepCopy(arrivals))
 	ticker.tick(this.time, this.state, events, metatimeFilter)
 	this.ticksDoneThisTick++
 	this.time++
@@ -70,6 +70,10 @@ Timeline.prototype.tick = function(ticker) {
 			}
 			this.saveState(tickerwave.time, tickerwave.state)
 		}
+	}, this)
+	this.timewaves.forEach(function(wave) {
+		if (wave.wraparound && wave.time > this.stateFrequency * this.stateCount)
+			this.jump(0, wave)
 	}, this)
 }
 

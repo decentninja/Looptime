@@ -5,6 +5,8 @@
 var PLAYER_SPEED = 0.1
 var SAVE_STATE_RATE = 30		// Save state twice every second
 var SAVE_STATE_COUNT = 600  // A timeline of 5 min
+var FASTWAVE_SPEED = 3
+var FASTWAVE_SPACING = 120  // About a minute between each fastwave
 var TARGET_FRAMERATE = 60
 
 function Game() {
@@ -42,8 +44,12 @@ function Game() {
 	this.timeline.ensurePlayerAt(startTime, new Player(0, -1))
 	// It is now safe to create timewaves, they will have an updated state
 
-	// Create the playerwave and connect it to the things that need it
+	// Create the playerwave
 	this.playerwave = this.timeline.createTimewave(startTime, 1, true, false)
+
+	for (var time = 0; time < SAVE_STATE_COUNT * SAVE_STATE_RATE; time += FASTWAVE_SPACING * SAVE_STATE_RATE) {
+		this.timeline.createTimewave(time, FASTWAVE_SPEED, false, true)
+	}
 
 	// Set up ticker controlled array
 	this.ticker.controlled = [{
@@ -206,16 +212,20 @@ Game.prototype.updateMap = function(ctx, width, height) {
 
 	// Paint waves and cursor
 	var timeline = this.timeline
-	function marker(time) {
-		var position = (width-10) * timeline.calcJumpTarget(time, 0) / totaltime
+	function marker(time, snap) {
+		var position
+		if (snap)
+			position = (width-10) * timeline.calcJumpTarget(time, 0) / totaltime
+		else
+			position = (width-10) * time / totaltime
 		ctx.fillStyle = "black"
 		ctx.fillRect(position, 0, 2, height-12)
 		ctx.textAlign = "center"
 		ctx.font = "10pt Helvetica"
 		ctx.fillText(Math.round(time/60), position, height)
 	}
-	marker(this.timecursor)
+	marker(this.timecursor, true)
 	this.timeline.timewaves.forEach(function(timewave) {
-		marker(timewave.time)
+		marker(timewave.time, false)
 	})
 }
