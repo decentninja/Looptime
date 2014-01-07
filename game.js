@@ -9,7 +9,7 @@ var FASTWAVE_SPEED = 3
 var FASTWAVE_SPACING = 120  // About a minute between each fastwave
 var TARGET_FRAMERATE = 60
 
-function Game() {
+function Game(numplayers, playerid) {
 	// The initial state that will populate the entire timeline at game start
 	var initialState = {
 		players: [],
@@ -34,14 +34,15 @@ function Game() {
 
 	// Initialize data necessary for player control and camera
 	this.pointerIsLocked = false
-	this.controlledId = 0
-	this.controlledVersions = [0]
+	this.controlledId = playerid
+	this.controlledVersion = 0
 	this.activeplayer = null
 	this.timecursor = 0
 
 	// Set up initial events and stuff on the timeline
 	var startTime = this.timeline.calcJumpTarget(SAVE_STATE_COUNT * SAVE_STATE_RATE / 2)
-	this.timeline.ensurePlayerAt(startTime, new Player(0, -1))
+	for (var id = 0; id < numplayers; id++)
+		this.timeline.ensurePlayerAt(startTime, new Player(id, -1))
 	// It is now safe to create timewaves, they will have an updated state
 
 	// Create the playerwave
@@ -51,11 +52,13 @@ function Game() {
 		this.timeline.createTimewave(time, FASTWAVE_SPEED, false, true)
 	}
 
-	// Set up ticker controlled array
-	this.ticker.controlled = [{
-		version: 0,
-		timewave: this.playerwave,
-	}]
+	// Set up ticker controlled array and create timewaves for other players
+	for (var id = 0; id < numplayers; id++) {
+		this.ticker.controlled.push({
+			version: 0,
+			timewave: id === playerid ? this.playerwave : this.timeline.createTimewave(startTime, 1, true, false)
+		})
+	}
 
 	// Connect everything
 	this.timeline.connect(this.sendmess)
@@ -77,7 +80,7 @@ Game.prototype.handleInput = function(event) {
 		var internalEvent = new PlayerEvent(event)
 		internalEvent.metatime = this.metatime //used to determine the age of player events, for properly syncing timewaves
 		internalEvent.id = this.controlledId
-		internalEvent.version = this.controlledVersions[this.controlledId]
+		internalEvent.version = this.controlledVersion
 		switch(event.type) {
 			case "wheel":
 				if (event.wheelDelta) {
@@ -106,7 +109,8 @@ Game.prototype.handleInput = function(event) {
 }
 
 Game.prototype.onNewJumpSuccessful = function(id) {
-	this.controlledVersions[id]++
+	if (this.controlledId === id)
+		this.controlledVersion++
 }
 
 Game.prototype.update = function() {
@@ -163,7 +167,7 @@ Game.prototype.updateGraphics = function() {
 			if(!model.alive) {
 				toberemoved.push(model)
 			}
-			if(this.controlledId === model.id && this.controlledVersions[model.id] === model.version) {
+			if(this.controlledId === model.id && this.controlledVersion === model.version) {
 				this.activeplayer = model 	// Switch camera if nessesary
 			}
 		}, this)

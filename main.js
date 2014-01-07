@@ -30,9 +30,9 @@ canvas.width = canvas.clientWidth
 canvas.height = canvas.clientHeight
 
 var game = null				// Game logic scope
-function enterGame(name) {
+function enterGame(name, numplayers, playerid) {
 	// TODO websocket setup, password logon and map loading etc
-	game = new Game()
+	game = new Game(numplayers, playerid)
 }
 function update() {
 	requestAnimationFrame(update)
@@ -44,8 +44,12 @@ function update() {
 	}
 }
 
-enterGame("lobby")		// The lobby is also a game map but without networking
-update()
+if (location.protocol === "file:") {
+	enterGame("lobby", 1, 0)		// The lobby is also a game map but without networking
+	update()
+} else {
+	//TODO networking
+}
 
 document.addEventListener('pointerlockchange', pointerlockchange, false)
 document.addEventListener('mozpointerlockchange', pointerlockchange, false)
