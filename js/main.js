@@ -12,15 +12,17 @@ var renderer = new THREE.WebGLRenderer({
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.setClearColor(0xffffff, 1)
 
+var sendmess = new SendMessage()
+
 var pointerlockchange = function ( event ) {
-	var islocked = 
+	var islocked =
 		document.pointerLockElement == el ||
-		document.mozPointerLockElement == el || 
+		document.mozPointerLockElement == el ||
 		document.webkitPointerLockElement == el
 	if(islocked) {
-		game.pointerIsLocked = true
+		sendmess.send(-1, "onPointerLockChange", true)
 	} else {
-		game.pointerIsLocked = false
+		sendmess.send(-1, "onPointerLockChange", true)
 	}
 }
 
@@ -32,15 +34,14 @@ canvas.height = canvas.clientHeight
 var game = null				// Game logic scope
 function enterGame(name, numplayers, playerid) {
 	// TODO websocket setup, password logon and map loading etc
-	game = new Game(numplayers, playerid)
+	game = new Game(numplayers, playerid, sendmess)
 }
 function update() {
 	requestAnimationFrame(update)
 	if(!debug || debug && game.pointerIsLocked) {		// Pause on mouse blur while not debugging
-		game.update()
 		ctx.clearRect(0, 0, canvas.width, canvas.height)
-		game.updateMap(ctx, canvas.width, canvas.height)
-		renderer.render(game.scene, game.activeplayer.camera)
+		game.update(ctx, canvas.width, canvas.height)
+		renderer.render(game.graphics.scene, game.graphics.activeplayer.camera)
 	}
 }
 
@@ -68,7 +69,7 @@ window.addEventListener('resize', function() {
 	canvas.height = canvas.clientHeight
 }, false)
 function handle(event) {
-	game.handleInput(event)
+	sendmess.send(-1, "onWindowInput", event)
 }
 document.addEventListener('mousemove', handle, false)
 document.addEventListener('keydown', handle, false)

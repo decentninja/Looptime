@@ -41,7 +41,8 @@ function Timeline(stateCount, stateFrequency, initialState) {
 	this.stateFrequency = stateFrequency
 }
 
-Timeline.prototype.connect = function(sendmess) {
+Timeline.prototype.connect = function(ticker, sendmess) {
+	this.ticker = ticker
 	this.sendmess = sendmess
 }
 
@@ -55,14 +56,14 @@ Timeline.prototype.createTimewave = function(time, speed, snap, wraparound) {
 /*
 	Move all timewaves according to their speed. Handle wave collision with noopTick's.
  */
-Timeline.prototype.tick = function(ticker) {
+Timeline.prototype.tick = function() {
 	this.sortWaves()
 	this.timewaves.forEach(function(wave) {
 		wave.ticksDoneThisTick = 0
 	})
 	this.timewaves.forEach(function(tickerwave, ti) {
 		while (tickerwave.ticksDoneThisTick < tickerwave.speed) {
-			tickerwave.tick(this.events[tickerwave.time], this.arrivals[tickerwave.time+1], ticker)
+			tickerwave.tick(this.events[tickerwave.time], this.arrivals[tickerwave.time+1], this.ticker)
 			for (var i = ti + 1; i < this.timewaves.length && this.timewaves[i].time === tickerwave.time - 1; i++) {
 				if (this.timewaves[i].ticksDoneThisTick < this.timewaves[i].speed) {
 					this.timewaves[i].noopTick(tickerwave.state)
@@ -154,7 +155,7 @@ Timeline.prototype.addEvent = function(time, event) {
 	at either the same point in time or with a distance of at
 	least latency, as well as travelling at the same speed.
 */
-Timeline.prototype.addAndReplayEvent = function(time, event, timewave, ticker) {
+Timeline.prototype.addAndReplayEvent = function(time, event, timewave) {
 	this.addEvent(time, event)
 	var tempwave = new Timewave(-1, -1, null)
 	this.jump(time, tempwave)
@@ -183,7 +184,7 @@ Timeline.prototype.addAndReplayEvent = function(time, event, timewave, ticker) {
 	}
 
 	while (tempwave.time < timewave.time) {
-		tempwave.tick(this.events[tempwave.time], this.arrivals[tempwave.time+1], ticker)
+		tempwave.tick(this.events[tempwave.time], this.arrivals[tempwave.time+1], this.ticker)
 
 		//update the state of all passed waves
 		while (this.timewaves[i] && this.timewaves[i].time == time) {
@@ -197,7 +198,7 @@ Timeline.prototype.addAndReplayEvent = function(time, event, timewave, ticker) {
 				var twave = deepCopy(tempwave)
 				var metatimeFilter = event.metatime + tempwave.time - time
 				while (twave.time < f.time)
-					twave.tick(this.events[twave.time], this.arrivals[tempwave.time+1], ticker, metatimeFilter)
+					twave.tick(this.events[twave.time], this.arrivals[tempwave.time+1], this.ticker, metatimeFilter)
 				f.state = twave.state
 			}, this)
 		}
