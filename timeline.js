@@ -1,14 +1,15 @@
 var TIMEWAVE_SNAP = 240 //roughly 4 seconds
-var TIMEWAVE_SNAP_SPEED = 1 //the speed of the timewaves to snap to
 
 /*
 	Propagation of change though the timeline
  */
-function Timewave(time, speed, state) {
-	this.time = time
+function Timewave(speed, snap, wraparound) {
+	this.time = -1
 	this.ticksDoneThisTick = 0
 	this.speed = speed
-	this.state = deepCopy(state)
+	this.state = null
+	this.snap = snap
+	this.wraparound = wraparound
 }
 
 Timewave.prototype.tick = function(events, arrivals, ticker, metatimeFilter) {
@@ -29,7 +30,7 @@ Timewave.prototype.noopTick = function(state) {
 /*
 	Bookkeeping events, states and waves
  */
-function Timeline(stateCount, stateFrequency, initialState, sendmess) {
+function Timeline(stateCount, stateFrequency, initialState) {
 	this.timewaves = []
 	this.events = []    // IMPROV Prealocate for performance?
 	this.arrivals = []
@@ -38,7 +39,17 @@ function Timeline(stateCount, stateFrequency, initialState, sendmess) {
 		this.states[i] = initialState
 	this.stateCount = stateCount
 	this.stateFrequency = stateFrequency
+}
+
+Timeline.prototype.connect = function(sendmess) {
 	this.sendmess = sendmess
+}
+
+Timeline.prototype.createTimewave = function(time, speed, snap, wraparound) {
+	var wave = new Timewave(speed, snap, wraparound)
+	this.timewaves.push(wave)
+	this.jump(time, wave)
+	return wave
 }
 
 /*
@@ -109,7 +120,7 @@ Timeline.prototype.removePlayerAt = function(time, player) {
 Timeline.prototype.calcJumpTarget = function(time, metatimeOffset) {
 	for (var i = 0; i < this.timewaves.length; i++) {
 		var wave = this.timewaves[i]
-		if (wave.speed === TIMEWAVE_SNAP_SPEED && Math.abs(wave.time - time) < TIMEWAVE_SNAP) {
+		if (wave.snap && Math.abs(wave.time - time) < TIMEWAVE_SNAP) {
 			return wave.time + metatimeOffset*wave.speed
 		}
 	}

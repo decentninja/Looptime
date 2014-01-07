@@ -8,47 +8,59 @@ var SAVE_STATE_COUNT = 600  // A timeline of 5 min
 var TARGET_FRAMERATE = 60
 
 function Game() {
+	// The initial state that will populate the entire timeline at game start
 	var initialState = {
 		players: [],
 		jumptimers: [],
 	}
-	this.sendmess = new SendMessage() //it feels a lot like the graphics stuff should be split out of game
-	this.sendmess.register(this)
-	this.map = new Lobby()
 
-	this.timeline = new Timeline(SAVE_STATE_COUNT, SAVE_STATE_RATE, initialState, this.sendmess)
-	this.ticker = new Ticker(this.map, this.timeline, this.sendmess)
-
-	this.pointerIsLocked = false
+	// Initialize timing things
 	this.metatime = 0
 	this.deltatime = null
 	this.realtime = performance.now()
 
-	this.delayedJumpers = []
+	this.sendmess = new SendMessage()
+	this.map = new Lobby()
+	this.timeline = new Timeline(SAVE_STATE_COUNT, SAVE_STATE_RATE, initialState)
+	this.ticker = new Ticker()
 
+	// Initialize scene
 	this.scene = new THREE.Scene()
 	this.scene.add(this.map)
 	this.playerModels = new THREE.Object3D()	// Object3D of Object3D's (players) of PlayerModels (versions)
 	this.scene.add(this.playerModels)
 
-	// Initialize controlled player
-	this.playerwave = new Timewave(-1, 1, initialState)
-	this.sendmess.timewave = this.playerwave
-	this.timeline.timewaves.push(this.playerwave)
+	// Initialize data necessary for player control and camera
+	this.pointerIsLocked = false
 	this.controlledId = 0
 	this.controlledVersions = [0]
+	this.activeplayer = null
+	this.timecursor = 0
+
+	// Set up initial events and stuff on the timeline
+	var startTime = this.timeline.calcJumpTarget(SAVE_STATE_COUNT * SAVE_STATE_RATE / 2)
+	this.timeline.ensurePlayerAt(startTime, new Player(0, -1))
+	// It is now safe to create timewaves, they will have an updated state
+
+	// Create the playerwave and connect it to the things that need it
+	this.playerwave = this.timeline.createTimewave(startTime, 1, true, false)
+
+	// Set up ticker controlled array
 	this.ticker.controlled = [{
 		version: 0,
 		timewave: this.playerwave,
 	}]
-	this.activeplayer = null
-	this.timecursor = 0
 
-	var startTime = this.timeline.calcJumpTarget(SAVE_STATE_COUNT * SAVE_STATE_RATE / 2)
-	this.timeline.ensurePlayerAt(startTime, new Player(0, -1))
-	this.timeline.jump(startTime, this.playerwave)
+	// Connect everything
+	this.timeline.connect(this.sendmess)
+	this.ticker.connect(this.map, this.timeline, this.sendmess)
+	this.sendmess.connect(this.playerwave)
 
-	this.update()		// Create model and camera for first frame
+	// Register receivers with sendmess
+	this.sendmess.register(this)
+
+	// Create model and camera for first frame
+	this.update()
 }
 
 /*

@@ -2,12 +2,15 @@ var TIMEJUMP_DELAY = 120 //roughly 2 seconds
 
 var foundDuplicates = false
 
-function Ticker(map, timeline, sendmess) {
+function Ticker() {
+  this.delayedJumpers = []
+  this.controlled = [] //should be set externally
+}
+
+Ticker.prototype.connect = function(map, timeline, sendmess) {
   this.map = map
   this.timeline = timeline
   this.sendmess = sendmess
-  this.delayedJumpers = []
-  this.controlled = [] //should be set externally
 }
 
 Ticker.prototype.doDelayedJumps = function() {

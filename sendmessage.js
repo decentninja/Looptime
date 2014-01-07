@@ -12,8 +12,11 @@
   or something similar
 */
 
-function SendMessage(timewave) {
+function SendMessage() {
   this.receivers = []
+}
+
+SendMessage.prototype.connect = function(timewave) {
   this.timewave = timewave
 }
 
