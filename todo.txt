@@ -1,3 +1,3 @@
 - make addAndReplayEvent capable of taking multiple events at a time
-- split graphics out of game
 - improve handling of timewave wraparound
+- disable jumping to the current time, I think it breaks things

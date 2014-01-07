@@ -69,7 +69,7 @@ function Game(numplayers, playerid, sendmess) {
 
 Game.prototype.update = function(ctx, width, height) {
 	var temptime = performance.now()
-	var deltatime = temptime - this.realtime
+	this.deltatime += temptime - this.realtime
 	this.realtime = temptime
 
 	this.advanceTime()
@@ -79,10 +79,11 @@ Game.prototype.update = function(ctx, width, height) {
 }
 
 Game.prototype.advanceTime = function() {
-	for(var i = 0; i <= this.deltatime; i += 1000/TARGET_FRAMERATE) {	// Catch up
+	while (this.deltatime >= 1000/TARGET_FRAMERATE) {	// Catch up
 		this.timeline.tick()
 		this.ticker.doDelayedJumps()
 		this.input.tick()
+		this.deltatime -= 1000/TARGET_FRAMERATE
 	}
 }
 
