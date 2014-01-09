@@ -152,11 +152,10 @@ Timeline.prototype.jump = function(time, timewave) {
 	return timewave.time
 }
 
-Timeline.prototype.addEvent = function(time, event) {
-	if(!this.events[time]) {
-		this.events[time] = []
-	}
-	this.events[time].push(event)
+Timeline.prototype.addEvent = function(event) {
+	if(!this.events[event.time])
+		this.events[event.time] = []
+	this.events[event.time].push(event)
 }
 
 //TODO: enable this function to mass-insert events
@@ -165,13 +164,21 @@ Timeline.prototype.addEvent = function(time, event) {
 	at either the same point in time or with a distance of at
 	least latency, as well as travelling at the same speed.
 */
-Timeline.prototype.addAndReplayEvent = function(time, event, timewave) {
-	this.addEvent(time, event)
+/*
+	Desync: if a timewave with new changes overtakes the point at
+	which tempwave is created before the event has arrived over
+	the network all timewaves affected by the call to addAndReplayEvent
+	will get those changes before they should. This will probably
+	rarely make a big change, and sometimes make things change slightly
+	before being overtaken by a timewave.
+*/
+Timeline.prototype.addAndReplayEvent = function(event, timewave) {
+	this.addEvent(event)
 	var tempwave = new Timewave(-1, false, false)
-	this.jump(time, tempwave)
+	this.jump(event.time, tempwave)
 	this.sortWaves()
 	var i = 0
-	while (this.timewaves[i] && this.timewaves[i].time <= time)
+	while (this.timewaves[i] && this.timewaves[i].time <= event.time)
 		i++
 	//i points to the first timewave that may be affected
 
@@ -185,7 +192,7 @@ Timeline.prototype.addAndReplayEvent = function(time, event, timewave) {
 	while (this.timewaves[j]) {
 		var f = this.timewaves[j]
 		var branchpoint = Math.floor(p.time + p.speed*(f.time - p.time)/(p.speed - f.speed))
-		if (branchpoint >= time) {
+		if (branchpoint >= event.time) {
 			if (!branchpoints[branchpoint])
 				branchpoints[branchpoint] = []
 			branchpoints[branchpoint].push(f)
@@ -197,7 +204,7 @@ Timeline.prototype.addAndReplayEvent = function(time, event, timewave) {
 		tempwave.tick(this.events[tempwave.time], this.arrivals[tempwave.time+1], this.ticker)
 
 		//update the state of all passed waves
-		while (this.timewaves[i] && this.timewaves[i].time == time) {
+		while (this.timewaves[i] && this.timewaves[i].time == event.time) {
 			this.timewaves[i].state = deepCopy(tempwave.state)
 			i++
 		}
@@ -206,7 +213,7 @@ Timeline.prototype.addAndReplayEvent = function(time, event, timewave) {
 		if (branchpoints[tempwave.time]) {
 			branchpoints[tempwave.time].forEach(function(f) {
 				var twave = deepCopy(tempwave)
-				var metatimeFilter = event.metatime + tempwave.time - time
+				var metatimeFilter = event.metatime + tempwave.time - event.time
 				while (twave.time < f.time)
 					twave.tick(this.events[twave.time], this.arrivals[tempwave.time+1], this.ticker, metatimeFilter)
 				f.state = twave.state

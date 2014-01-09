@@ -8,6 +8,11 @@ function Network(url) {
   //TODO: set up websocket and stuff
 }
 
+Network.prototype.connect = function(timeline, timewaves) {
+  this.timeline = timeline
+  this.timewaves = timewaves
+}
+
 Network.prototype.onAddedLocalEvent = function(event) {
   if (!this.queue)
     return
@@ -18,4 +23,10 @@ Network.prototype.onAddedLocalEvent = function(event) {
     return
 
   //TODO: send all events in queue
+}
+
+Network.prototype.onReceivedRemoteEvents = function(events) {
+  events.forEach(function(event) {
+    this.timeline.addAndReplayEvent(event, this.timewaves[event.id])
+  }, this)
 }

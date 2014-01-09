@@ -55,6 +55,7 @@ function Game(numplayers, playerid, network, sendmess) {
 	this.timemap.connect(this.timeline)
 	this.graphics.connect(map, playerwave)
 	this.input.connect(this.timeline, playerwave, sendmess)
+	network.connect(this.timeline, this.ticker.controlled.map(function(pInfo) { return pInfo.timewave }))
 	sendmess.connect(playerwave)
 
 	// Register receivers with sendmess

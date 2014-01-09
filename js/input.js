@@ -1,5 +1,6 @@
 function Input(playerid) {
   this.pointerIsLocked = false
+  this.inputIsAllowed = true
   this.controlledId = playerid
   this.controlledVersion = 0
   this.timecursor = 0
@@ -13,8 +14,10 @@ Input.prototype.connect = function(timeline, playerwave, sendmess) {
 }
 
 Input.prototype.onNewJumpSuccessful = function(id) {
-  if (this.controlledId === id)
+  if (this.controlledId === id) {
     this.controlledVersion++
+    this.inputIsAllowed = true
+  }
 }
 
 Input.prototype.onPointerLockChange = function(pointerIsLocked) {
@@ -26,7 +29,7 @@ Input.prototype.tick = function() {
 }
 
 Input.prototype.onWindowInput = function(event) {
-  if (!this.pointerIsLocked)
+  if (!this.pointerIsLocked || !this.inputIsAllowed)
     return
 
   var internalEvent = new PlayerEvent(event)
@@ -54,9 +57,11 @@ Input.prototype.onWindowInput = function(event) {
       if (event.keyCode === 32) {
         internalEvent.type = "jump"
         internalEvent.jumptarget = this.timeline.calcJumpTarget(this.timecursor, TIMEJUMP_DELAY)
+        this.inputIsAllowed = false
       }
       break
   }
-  this.timeline.addEvent(this.playerwave.time, internalEvent)
+  internalEvent.time = this.playerwave.time
+  this.timeline.addEvent(internalEvent)
   this.sendmess.send(-1, "onAddedLocalEvent", internalEvent)
 }
