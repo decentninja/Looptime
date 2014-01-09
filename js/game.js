@@ -8,8 +8,9 @@ var SAVE_STATE_COUNT = 600  // A timeline of 5 min
 var FASTWAVE_SPEED = 3
 var FASTWAVE_SPACING = 120  // About a minute between each fastwave
 var TARGET_FRAMERATE = 60
+var START_DELAY = 5000      // A 5 second delay to start the game
 
-function Game(numplayers, playerid, network, sendmess) {
+function Game(numplayers, playerid, startFunction, network, sendmess) {
 	// The initial state that will populate the entire timeline at game start
 	var initialState = {
 		players: [],
@@ -19,6 +20,7 @@ function Game(numplayers, playerid, network, sendmess) {
 	// Initialize timing things
 	this.deltatime = null
 	this.realtime = performance.now()
+	this.startDelayLeft = START_DELAY
 
 	map = new Lobby()
 	this.timeline = new Timeline(SAVE_STATE_COUNT, SAVE_STATE_RATE, initialState)
@@ -55,7 +57,7 @@ function Game(numplayers, playerid, network, sendmess) {
 	this.timemap.connect(this.timeline)
 	this.graphics.connect(map, playerwave)
 	this.input.connect(this.timeline, playerwave, sendmess)
-	network.connect(this.timeline, this.ticker.controlled.map(function(pInfo) { return pInfo.timewave }))
+	network.connect(this.timeline, this.ticker.controlled.map(function(pInfo) { return pInfo.timewave }), startFunction)
 	sendmess.connect(playerwave)
 
 	// Register receivers with sendmess
@@ -74,10 +76,22 @@ Game.prototype.update = function(ctx, width, height) {
 	this.deltatime += temptime - this.realtime
 	this.realtime = temptime
 
+	if (this.startDelayLeft > 0) {
+		this.startDelayLeft -= this.deltatime
+		this.deltatime = 0
+		if (this.startDelayLeft < 0)
+			this.deltatime = -this.startDelayLeft
+		return
+	}
+
 	this.advanceTime()
 
 	this.graphics.update()
 	this.timemap.update(ctx, width, height)
+}
+
+Game.prototype.adjustTimer = function(adjustment) {
+	this.startDelayLeft += adjustment
 }
 
 Game.prototype.advanceTime = function() {

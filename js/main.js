@@ -35,7 +35,11 @@ var game = null				// Game logic scope
 var network = null
 function enterGame(name, numplayers, playerid) {
 	// TODO websocket setup, password logon and map loading etc
-	game = new Game(numplayers, playerid, network, sendmess)
+	game = new Game(numplayers, playerid, startFunc, network, sendmess)
+}
+function startFunc(latency) {
+	game.adjustTimer(-latency)
+	update()
 }
 function update() {
 	requestAnimationFrame(update)
@@ -49,8 +53,9 @@ function update() {
 if (location.protocol === "file:") {
 	network = new Network()
 	enterGame("lobby", 1, 0)		// The lobby is also a game map but without networking
-	update()
+	startFunc(START_DELAY) // Constant borrowed from game.js
 } else {
+	network = new Network("ws://" +location.host+ "/ws")
 	//TODO networking
 }
 

@@ -1,16 +1,39 @@
 var MAX_QUEUE_LENGTH = 20 //TODO: figure out if this is a good limit
+var LATENCY_MEMORY = (1 << 3) - 1
 
-function Network(url) {
-  if (!url)
-    return //if this.queue isn't initialized all network functions are no-ops
+function Network() {}
 
+Network.prototype.takeControlOf = function(socket) {
   this.queue = []
-  //TODO: set up websocket and stuff
+  latencyMemory = []
+  var latencyIndex
+  var lastTime
+
+  socket.onmessage = function(mess) {
+    switch (mess.data) {
+      case "pong":
+        latencyMemory[latencyIndex & LATENCY_MEMORY] = performance.now() - lastTime
+        if (latencyIndex > LATENCY_MEMORY) {
+          socket.send("ready")
+        } else {
+          socket.send("ping")
+        }
+        return
+
+      case "start":
+        this.startFunction(latencyMemory.reduce(function(a, b) { return a + b }) / latencyMemory.length)
+        return
+
+      default:
+        this.onReceivedRemoteEvents(JSON.parse(mess.data))
+    }
+  }.bind(this)
 }
 
-Network.prototype.connect = function(timeline, timewaves) {
+Network.prototype.connect = function(timeline, timewaves, startFunction) {
   this.timeline = timeline
   this.timewaves = timewaves
+  this.startFunction = startFunction
 }
 
 Network.prototype.onAddedLocalEvent = function(event) {
