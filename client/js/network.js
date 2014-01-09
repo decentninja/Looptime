@@ -60,7 +60,5 @@ Network.prototype.onAddedLocalEvent = function(event) {
 }
 
 Network.prototype.onReceivedRemoteEvents = function(events) {
-  events.forEach(function(event) {
-    this.timeline.addAndReplayEvent(event, this.timewaves[event.id])
-  }, this)
+  this.timeline.addAndReplayEvents(events, this.timewaves[events[0].id])
 }

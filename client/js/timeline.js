@@ -139,7 +139,7 @@ Timeline.prototype.jump = function(time, timewave) {
 	if (this.timewaves[i] && this.timewaves[i].time === time) {
 		timewave.state = deepCopy(this.timewaves[i].state)
 		timewave.time = time
-		return
+		return timewave.time
 	}
 
 	// There was no timewave at the target time, jump to the closest saved state
@@ -172,8 +172,9 @@ Timeline.prototype.addEvent = function(event) {
 	rarely make a big change, and sometimes make things change slightly
 	before being overtaken by a timewave.
 */
-Timeline.prototype.addAndReplayEvent = function(event, timewave) {
-	this.addEvent(event)
+Timeline.prototype.addAndReplayEvents = function(events, timewave) {
+	events.forEach(this.addEvent, this)
+	var event = events[0]
 	var tempwave = new Timewave(-1, false, false)
 	this.jump(event.time, tempwave)
 	this.sortWaves()
@@ -202,18 +203,20 @@ Timeline.prototype.addAndReplayEvent = function(event, timewave) {
 
 	while (tempwave.time < timewave.time) {
 		tempwave.tick(this.events[tempwave.time], this.arrivals[tempwave.time+1], this.ticker)
+		this.saveState(tempwave.time, tempwave.state)
 
 		//update the state of all passed waves
-		while (this.timewaves[i] && this.timewaves[i].time == event.time) {
+		while (this.timewaves[i] && this.timewaves[i].time === tempwave.time) {
+			console.log("addAndReplayEvent affected a timewave")
 			this.timewaves[i].state = deepCopy(tempwave.state)
 			i++
 		}
 
 		//update the state of all waves that overtook timewave at this time
 		if (branchpoints[tempwave.time]) {
+			var metatimeFilter = event.metatime + tempwave.time - event.time
 			branchpoints[tempwave.time].forEach(function(f) {
 				var twave = deepCopy(tempwave)
-				var metatimeFilter = event.metatime + tempwave.time - event.time
 				while (twave.time < f.time)
 					twave.tick(this.events[twave.time], this.arrivals[tempwave.time+1], this.ticker, metatimeFilter)
 				f.state = twave.state
