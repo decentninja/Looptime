@@ -37,6 +37,7 @@ function enterGame(name, numplayers, playerid) {
 	game = new Game(numplayers, playerid, new Network(websocket, startFunc), sendmess)
 }
 function startFunc(latency) {
+	console.log("About to start the game with a latency adjustment of " +latency)
 	game.adjustTimer(-latency)
 	update()
 }
@@ -49,17 +50,21 @@ function update() {
 	}
 }
 
-if (location.protocol === "file:" || true) {
+if (location.protocol === "file:" || debug) {
 	enterGame("lobby", 1, 0)		// The lobby is also a game map but without networking
 	startFunc(START_DELAY) // Constant borrowed from game.js
 } else {
 	websocket = new WebSocket("ws://" + location.host + "/ws")
 	websocket.onmessage = function(mess) {
+		console.log("got first message")
 		var m = JSON.parse(mess.data)
 		enterGame("lobby", m.playerCount, m.playerId)
 	}
 	websocket.onerror = function(thing) {
 		console.error("The network died somehow.", thing)
+	}
+	websocket.onopen = function(thing) {
+		console.log("connected", thing)
 	}
 }
 

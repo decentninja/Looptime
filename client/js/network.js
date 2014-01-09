@@ -7,19 +7,19 @@ function Network(websocket, startFunction) {
 
   this.startFunction = startFunction
   this.queue = []
+  this.websocket = websocket
   latencyMemory = []
-  var latencyIndex
-  var lastTime
+  var latencyIndex = 0
 
-  socket.onmessage = function(mess) {
+  websocket.onmessage = function(mess) {
     switch (mess.data) {
       case "pong":
-        latencyMemory[latencyIndex & LATENCY_MEMORY] = performance.now() - lastTime
+        latencyMemory[latencyIndex & LATENCY_MEMORY] = performance.now() - this.lastTime
+        latencyIndex++
         if (latencyIndex > LATENCY_MEMORY) {
-          socket.send("ready")
+          websocket.send("ready")
         } else {
-          lastTime = performance.now()
-          socket.send("ping")
+          this.sendPing()
         }
         return
 
@@ -31,6 +31,14 @@ function Network(websocket, startFunction) {
         this.onReceivedRemoteEvents(JSON.parse(mess.data))
     }
   }.bind(this)
+}
+
+Network.prototype.sendPing = function() {
+  if (!this.queue)
+    return
+
+  this.lastTime = performance.now()
+  websocket.send("ping")
 }
 
 Network.prototype.connect = function(timeline, timewaves) {
@@ -47,7 +55,8 @@ Network.prototype.onAddedLocalEvent = function(event) {
   if (this.queue.length < MAX_QUEUE_LENGTH && event.type === "mousemove")
     return
 
-  //TODO: send all events in queue
+  this.websocket.send(JSON.stringify(this.queue))
+  this.queue.length = []
 }
 
 Network.prototype.onReceivedRemoteEvents = function(events) {

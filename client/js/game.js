@@ -65,6 +65,8 @@ function Game(numplayers, playerid, network, sendmess) {
 	sendmess.register(this.timemap)
 	sendmess.register(this.input)
 	sendmess.register(network)
+
+	network.sendPing()
 }
 
 /*
