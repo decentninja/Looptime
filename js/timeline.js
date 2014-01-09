@@ -133,6 +133,16 @@ Timeline.prototype.calcJumpTarget = function(time, metatimeOffset) {
 }
 
 Timeline.prototype.jump = function(time, timewave) {
+	var i = 0
+	while (this.timewaves[i] && this.timewaves[i].time < time)
+		i++
+	if (this.timewaves[i] && this.timewaves[i].time === time) {
+		timewave.state = deepCopy(this.timewaves[i].state)
+		timewave.time = time
+		return
+	}
+
+	// There was no timewave at the target time, jump to the closest saved state
 	index = Math.floor(time/this.stateFrequency)
 	timewave.state = deepCopy(this.states[index])
   if (this.arrivals[time]) {
@@ -157,7 +167,7 @@ Timeline.prototype.addEvent = function(time, event) {
 */
 Timeline.prototype.addAndReplayEvent = function(time, event, timewave) {
 	this.addEvent(time, event)
-	var tempwave = new Timewave(-1, -1, null)
+	var tempwave = new Timewave(-1, false, false)
 	this.jump(time, tempwave)
 	this.sortWaves()
 	var i = 0
