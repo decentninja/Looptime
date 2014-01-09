@@ -10,7 +10,7 @@ var FASTWAVE_SPACING = 120  // About a minute between each fastwave
 var TARGET_FRAMERATE = 60
 var START_DELAY = 5000      // A 5 second delay to start the game
 
-function Game(numplayers, playerid, startFunction, network, sendmess) {
+function Game(numplayers, playerid, network, sendmess) {
 	// The initial state that will populate the entire timeline at game start
 	var initialState = {
 		players: [],
@@ -57,7 +57,7 @@ function Game(numplayers, playerid, startFunction, network, sendmess) {
 	this.timemap.connect(this.timeline)
 	this.graphics.connect(map, playerwave)
 	this.input.connect(this.timeline, playerwave, sendmess)
-	network.connect(this.timeline, this.ticker.controlled.map(function(pInfo) { return pInfo.timewave }), startFunction)
+	network.connect(this.timeline, this.ticker.controlled.map(function(pInfo) { return pInfo.timewave }))
 	sendmess.connect(playerwave)
 
 	// Register receivers with sendmess

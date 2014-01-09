@@ -1,9 +1,11 @@
 var MAX_QUEUE_LENGTH = 20 //TODO: figure out if this is a good limit
 var LATENCY_MEMORY = (1 << 3) - 1
 
-function Network() {}
+function Network(websocket, startFunction) {
+  if (!websocket)
+    return
 
-Network.prototype.takeControlOf = function(socket) {
+  this.startFunction = startFunction
   this.queue = []
   latencyMemory = []
   var latencyIndex
@@ -16,6 +18,7 @@ Network.prototype.takeControlOf = function(socket) {
         if (latencyIndex > LATENCY_MEMORY) {
           socket.send("ready")
         } else {
+          lastTime = performance.now()
           socket.send("ping")
         }
         return
@@ -30,10 +33,9 @@ Network.prototype.takeControlOf = function(socket) {
   }.bind(this)
 }
 
-Network.prototype.connect = function(timeline, timewaves, startFunction) {
+Network.prototype.connect = function(timeline, timewaves) {
   this.timeline = timeline
   this.timewaves = timewaves
-  this.startFunction = startFunction
 }
 
 Network.prototype.onAddedLocalEvent = function(event) {

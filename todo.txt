@@ -1,3 +1,4 @@
 - make addAndReplayEvent capable of taking multiple events at a time
 - improve handling of timewave wraparound
 - disable jumping to the current time, I think it breaks things
+- make something graphically pleasing when the start delay is happening

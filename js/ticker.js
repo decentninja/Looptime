@@ -47,6 +47,10 @@ Ticker.prototype.tick = function(time, state, events, latestAcceptableTime) {
 }
 
 Ticker.prototype.handleEvent = function(time, state, event) {
+  if (event.type === "jump") {
+    this.handleJumpEvent(time, state, event)
+    return
+  }
   for (var index = 0; index < state.players.length; index++) {
     var player = state.players[index]
 
@@ -54,10 +58,6 @@ Ticker.prototype.handleEvent = function(time, state, event) {
       continue
 
     switch(event.type) {
-      case "jump":
-        this.handleJumpEvent(time, state, event)
-        break
-
       case "fire":
         this.handleFireEvent(time, state, player)
         break
@@ -76,11 +76,16 @@ Ticker.prototype.handleJumpEvent = function(time, state, event) {
     jumptarget: event.jumptarget,
     timeLeft: TIMEJUMP_DELAY,
   })
-  this.sendmess.send(time, "onJumpInitiated", {
-    id: event.id,
-    version: event.version,
-    jumptarget: event.jumptarget,
-  })
+  for (var i = 0; i < state.players.length; i++) {
+    if (state.players[i].id !== event.id || state.players[i].version !== event.version)
+      continue
+    this.sendmess.send(time, "onJumpInitiated", {
+      id: event.id,
+      version: event.version,
+      jumptarget: event.jumptarget,
+    })
+    return
+  }
 }
 
 Ticker.prototype.handleJump = function(time, state, timer) {

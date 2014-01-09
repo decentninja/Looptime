@@ -22,7 +22,7 @@ var pointerlockchange = function ( event ) {
 	if(islocked) {
 		sendmess.send(-1, "onPointerLockChange", true)
 	} else {
-		sendmess.send(-1, "onPointerLockChange", true)
+		sendmess.send(-1, "onPointerLockChange", false)
 	}
 }
 
@@ -32,10 +32,9 @@ canvas.width = canvas.clientWidth
 canvas.height = canvas.clientHeight
 
 var game = null				// Game logic scope
-var network = null
+var websocket = null
 function enterGame(name, numplayers, playerid) {
-	// TODO websocket setup, password logon and map loading etc
-	game = new Game(numplayers, playerid, startFunc, network, sendmess)
+	game = new Game(numplayers, playerid, new Network(websocket, startFunc), sendmess)
 }
 function startFunc(latency) {
 	game.adjustTimer(-latency)
@@ -51,12 +50,17 @@ function update() {
 }
 
 if (location.protocol === "file:" || true) {
-	network = new Network()
 	enterGame("lobby", 1, 0)		// The lobby is also a game map but without networking
 	startFunc(START_DELAY) // Constant borrowed from game.js
 } else {
-	network = new Network("ws://" +location.host+ "/ws")
-	//TODO networking
+	websocket = new WebSocket("ws://" + location.host + "/ws")
+	websocket.onmessage = function(mess) {
+		var m = JSON.parse(mess.data)
+		enterGame("lobby", m.playerCount, m.playerId)
+	}
+	websocket.onerror = function(thing) {
+		console.error("The network died somehow.", thing)
+	}
 }
 
 document.addEventListener('pointerlockchange', pointerlockchange, false)
