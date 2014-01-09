@@ -9,7 +9,7 @@ var FASTWAVE_SPEED = 3
 var FASTWAVE_SPACING = 120  // About a minute between each fastwave
 var TARGET_FRAMERATE = 60
 
-function Game(numplayers, playerid, sendmess) {
+function Game(numplayers, playerid, network, sendmess) {
 	// The initial state that will populate the entire timeline at game start
 	var initialState = {
 		players: [],
@@ -61,6 +61,7 @@ function Game(numplayers, playerid, sendmess) {
 	sendmess.register(this.graphics)
 	sendmess.register(this.timemap)
 	sendmess.register(this.input)
+	sendmess.register(network)
 }
 
 /*
