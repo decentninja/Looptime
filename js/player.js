@@ -173,26 +173,20 @@ function PlayerModel(id, version) {
 	this.body.add(this.camera)
 	this.camera.position.y = 1.8
 
-	var gun = new THREE.Mesh(new THREE.CubeGeometry(0.3, 4, 0.75))
-	this.camera.add(gun)
-	gun.position.y = -1
-	gun.position.x = 1
-	gun.position.z = -2
-	gun.rotation.x = - Math.PI / 2
-
-	var textGeo = new THREE.TextGeometry( this.version, {
-		size: 80,
-		height: 20,
-		curveSegments: 2,
-		font: "optimer"
+	var manager = new THREE.LoadingManager()
+	manager.onProgress = function(item, loaded, total) {
+		console.log(item, loaded, total)
+	}
+	var loader = new THREE.OBJLoader(manager)
+	var that = this
+	loader.load("assets/grandfather_gun.obj", function(gun) {
+		that.camera.add(gun)
+		gun.position.z = -2
+		gun.position.y = -1
+		gun.position.x = -1.5
+		gun.scale.multiplyScalar(1.5)
+		gun.rotation.y = -Math.PI / 2
 	})
-	var textMesh = new THREE.Mesh(textGeo)
-	textMesh.scale.multiplyScalar(0.002)
-	textMesh.position.y = 0.4
-	textMesh.position.x = -0.5
-	textMesh.position.z = 0.35
-	textMesh.rotation.x = 1.3
-	gun.add(textMesh)
 }
 
 PlayerModel.prototype = Object.create(THREE.Object3D.prototype)

@@ -50,7 +50,7 @@ function update() {
 	}
 }
 
-if (location.protocol === "file:") {
+if (location.protocol === "file:" || true) {
 	network = new Network()
 	enterGame("lobby", 1, 0)		// The lobby is also a game map but without networking
 	startFunc(START_DELAY) // Constant borrowed from game.js
