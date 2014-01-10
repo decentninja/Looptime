@@ -78,8 +78,8 @@ document.addEventListener("click", function(event) {
 	}
 }, false)
 window.addEventListener('resize', function() {
-	game.activeplayer.camera.aspect = window.innerWidth / window.innerHeight;
-	game.activeplayer.camera.updateProjectionMatrix();
+	game.graphics.activeplayer.camera.aspect = window.innerWidth / window.innerHeight;
+	game.graphics.activeplayer.camera.updateProjectionMatrix();
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	canvas.width = canvas.clientWidth
 	canvas.height = canvas.clientHeight

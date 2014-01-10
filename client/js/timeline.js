@@ -41,7 +41,8 @@ function Timeline(stateCount, stateFrequency, initialState) {
 	this.stateFrequency = stateFrequency
 }
 
-Timeline.prototype.connect = function(ticker, sendmess) {
+Timeline.prototype.connect = function(timemap, ticker, sendmess) {
+	this.timemap = timemap
 	this.ticker = ticker
 	this.sendmess = sendmess
 }
@@ -69,6 +70,7 @@ Timeline.prototype.tick = function() {
 					this.timewaves[i].noopTick(tickerwave.state)
 				}
 			}
+			this.timemap.readTimelines()
 			this.saveState(tickerwave.time, tickerwave.state)
 		}
 	}, this)

@@ -52,7 +52,7 @@ function Game(numplayers, playerid, network, sendmess) {
 	}
 
 	// Connect everything
-	this.timeline.connect(this.ticker, sendmess)
+	this.timeline.connect(this.timemap, this.ticker, sendmess)
 	this.ticker.connect(map, this.timeline, sendmess)
 	this.timemap.connect(this.timeline)
 	this.graphics.connect(map, playerwave)
@@ -89,7 +89,7 @@ Game.prototype.update = function(ctx, width, height) {
 	this.advanceTime()
 
 	this.graphics.update()
-	this.timemap.update(ctx, width, height)
+	this.timemap.render(ctx, width, height)
 }
 
 Game.prototype.adjustTimer = function(adjustment) {
