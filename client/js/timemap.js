@@ -71,13 +71,16 @@ Existance.prototype.removeIfNotAffected = function(time) {
 
 Existance.prototype.setAt = function(time, exists) {
   var block
-  var i = 0
-  var max = 0
-  for (; i < this.blocks.length; i++) {
-    var priority = this.blocks[i].selectPriority(time)
-    if (priority > max) {
-      max = priority
-      block = this.blocks[i]
+  for (var i = 0; i < this.blocks.length; i++) {
+    if (this.blocks[i].selectPriority(time, !block)) {
+      if (!block) {
+        block = this.blocks[i]
+
+      } else {
+        console.log("merging an existanceblock")
+        block.merge(this.blocks[i])
+        this.blocks.splice(i, 1)
+      }
     }
   }
 
@@ -106,8 +109,10 @@ function ExistanceBlock(start, end) {
   this.end = end
 }
 
-ExistanceBlock.prototype.selectPriority = function(time) {
-  return this.start-1 <= time && time <= this.end+1
+ExistanceBlock.prototype.selectPriority = function(time, wide) {
+  if (wide)
+    return this.start-1 <= time && time <= this.end+1
+  return this.start <= time && time <= this.end
 }
 
 ExistanceBlock.prototype.include = function(time) {
@@ -116,6 +121,11 @@ ExistanceBlock.prototype.include = function(time) {
   } else if (this.end < time) {
     this.end = time
   }
+}
+
+ExistanceBlock.prototype.merge = function(block) {
+  this.start = Math.min(this.start, block.start)
+  this.end = Math.max(this.end, block.end)
 }
 
 ExistanceBlock.prototype.deleteAt = function(time) {
