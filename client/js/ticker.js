@@ -145,19 +145,10 @@ Ticker.prototype.handleFireEvent = function(time, state, player) {
     face the origin and check for collision, but it's slightly more complex
   */
   /*
-    Will use this until we see preformance problems
+    Will use this until we see performance problems
    */
   var gun = new THREE.Vector3(0, 8.8, 0)
   gun.add(player.position)
-//  var debugline = new THREE.Geometry()
-//  debugline.vertices.push(gun)
-//  debugline.vertices.push(player.getLookDirection().multiplyScalar(1000).add(gun))
-//  this.scene.add(new THREE.Line(debugline, new THREE.LineBasicMaterial({
-//    color: 0x0000ff,
-//    linewidth: 5,
-//    transparent: true,
-//    opacity: 0.5       // Will be filled by clone
-//  })))
 
   var ray = new THREE.Raycaster()
   ray.set(gun, player.getLookDirection())
@@ -187,9 +178,15 @@ Ticker.prototype.handleFireEvent = function(time, state, player) {
     this.sendmess.send(time, "onHit", {
       player: player,
       target: target,
+      originPoint: gun,
+      hitPoint: hit[0].point,
     })
     state.players.splice(i, 1)
   } else {
-    this.sendmess.send(time, "onMiss", player)
+    this.sendmess.send(time, "onMiss", {
+      player: player,
+      originPoint: gun,
+      direction: player.getLookDirection(),
+    })
   }
 }

@@ -76,6 +76,7 @@ function Game(numplayers, playerid, network, sendmess) {
 Game.prototype.update = function(ctx, width, height) {
 	var temptime = performance.now()
 	this.deltatime += temptime - this.realtime
+	var deltatime = temptime - this.realtime
 	this.realtime = temptime
 
 	if (this.startDelayLeft > 0) {
@@ -88,7 +89,7 @@ Game.prototype.update = function(ctx, width, height) {
 
 	this.advanceTime()
 
-	this.graphics.update()
+	this.graphics.update(deltatime)
 	this.timemap.render(ctx, width, height)
 }
 

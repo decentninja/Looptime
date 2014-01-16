@@ -1,3 +1,5 @@
+"strict mode";
+
 /*
 	Debug level, future tutorial and game select menu
 	With code from http://threejs.org/examples/#misc_controls_pointerlock
