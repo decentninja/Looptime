@@ -23,7 +23,7 @@ function Lobby() {
 	this.add(sphere)
 
 	// Floor
-	geometry = new THREE.PlaneGeometry( 2000, 2000, 100, 100 );
+	var geometry = new THREE.PlaneGeometry( 2000, 2000, 100, 100 );
 	geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
 	for ( var i = 0, l = geometry.vertices.length; i < l; i ++ ) {
 		var vertex = geometry.vertices[ i ];
@@ -37,8 +37,8 @@ function Lobby() {
 		face.vertexColors[ 1 ] = new THREE.Color().setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 )
 		face.vertexColors[ 2 ] = new THREE.Color().setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 )
 	}
-	material = new THREE.MeshBasicMaterial( { vertexColors: THREE.VertexColors } )
-	mesh = new THREE.Mesh( geometry, material )
+	var material = new THREE.MeshBasicMaterial( { vertexColors: THREE.VertexColors } )
+	var mesh = new THREE.Mesh( geometry, material )
 	this.add(mesh)
 
 	// Collition test cube

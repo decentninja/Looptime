@@ -1,3 +1,5 @@
+"strict mode";
+
 var MAX_QUEUE_LENGTH = 20 //TODO: figure out if this is a good limit
 var LATENCY_MEMORY = (1 << 3) - 1
 
@@ -8,7 +10,7 @@ function Network(websocket, startFunction) {
   this.startFunction = startFunction
   this.queue = []
   this.websocket = websocket
-  latencyMemory = []
+  var latencyMemory = []
   var latencyIndex = 0
 
   websocket.onmessage = function(mess) {
@@ -38,7 +40,7 @@ Network.prototype.sendPing = function() {
     return
 
   this.lastTime = performance.now()
-  websocket.send("ping")
+  this.websocket.send("ping")
 }
 
 Network.prototype.connect = function(timeline, timewaves) {

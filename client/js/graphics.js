@@ -1,4 +1,4 @@
-function Graphics(playerid, map) {
+function Graphics(playerid) {
   this.controlledId = playerid
   this.controlledVersion = 0
 

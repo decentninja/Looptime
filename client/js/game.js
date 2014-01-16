@@ -1,8 +1,8 @@
+"strict mode";
 /*
 	Scene, active player, time
  */
 
-var PLAYER_SPEED = 0.1
 var SAVE_STATE_RATE = 30		// Save state twice every second
 var SAVE_STATE_COUNT = 600  // A timeline of 5 min
 var FASTWAVE_SPEED = 3
@@ -22,7 +22,7 @@ function Game(numplayers, playerid, network, sendmess) {
 	this.realtime = performance.now()
 	this.startDelayLeft = START_DELAY
 
-	map = new Lobby()
+	var map = new Lobby()
 	this.timeline = new Timeline(SAVE_STATE_COUNT, SAVE_STATE_RATE, initialState)
 	this.ticker = new Ticker()
 	this.graphics = new Graphics(playerid)
@@ -104,5 +104,3 @@ Game.prototype.advanceTime = function() {
 		this.deltatime -= 1000/TARGET_FRAMERATE
 	}
 }
-
-

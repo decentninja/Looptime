@@ -1,3 +1,7 @@
+"strict mode";
+
+/* global SAVE_STATE_RATE, SAVE_STATE_COUNT */
+
 var VERSIONS_TO_DISPLAY = 5
 
 function Timemap() {

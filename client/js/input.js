@@ -1,3 +1,7 @@
+"strict mode";
+
+/* global SAVE_STATE_RATE, TIMEJUMP_DELAY */
+
 function Input(playerid) {
   this.pointerIsLocked = false
   this.inputIsAllowed = true

@@ -1,0 +1,52 @@
+{
+	"bitwise": true,
+	"camelcase": true,
+	"eqeqeq": true,
+	"forin": true,
+	"freeze": true,
+	"immed": true,
+	"latedef": true,
+	"newcap": true,
+	"noarg": true,
+	"noempty": true,
+	"nonew": true,
+	"quotmark": true,
+	"undef": true,
+	"unused": true,
+	"trailing": true,
+	"maxparams": 3,
+	"maxdepth": 3,
+	"maxstatements": 15,
+
+	"curly": false,
+	"plusplus": false,
+	"es3": false,
+	"strict": false, // making the entire script strict is easier
+
+	"asi": true,
+	"shadow": true,
+
+	"browser": true,
+	"devel": true,
+
+	"globals": {
+		"performance": false,
+		"requestAnimationFrame": false,
+		"deepCopy": false,
+
+		"THREE": false,
+
+		"Game": false,
+		"Graphics": false,
+		"Lobby": false,
+		"Player": false,
+		"PlayerModel": false,
+		"PlayerEvent": false,
+		"Timeline": false,
+		"Timemap": false,
+		"Ticker": false,
+		"Input": false,
+		"Network": false,
+		"SendMessage": false
+	}
+}

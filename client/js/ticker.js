@@ -1,6 +1,8 @@
-var TIMEJUMP_DELAY = 120 //roughly 2 seconds
+"strict mode";
 
-var foundDuplicates = false
+/* global TARGET_FRAMERATE */
+
+var TIMEJUMP_DELAY = 120 //roughly 2 seconds
 
 function Ticker() {
   this.delayedJumpers = []

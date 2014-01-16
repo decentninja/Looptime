@@ -1,8 +1,12 @@
+"strict mode";
+
+/* global START_DELAY */
+
 /*
 	DOM stuff, start and global debugging hooks
  */
 
-var debug = location.search == "?debug=true"
+var debug = location.search === "?debug=true"
 
 var el = document.querySelector("#game")
 var renderer = new THREE.WebGLRenderer({
@@ -16,9 +20,9 @@ var sendmess = new SendMessage()
 
 var pointerlockchange = function ( event ) {
 	var islocked =
-		document.pointerLockElement == el ||
-		document.mozPointerLockElement == el ||
-		document.webkitPointerLockElement == el
+		document.pointerLockElement === el ||
+		document.mozPointerLockElement === el ||
+		document.webkitPointerLockElement === el
 	if(islocked) {
 		sendmess.send(-1, "onPointerLockChange", true)
 	} else {
@@ -33,14 +37,6 @@ canvas.height = canvas.clientHeight
 
 var game = null				// Game logic scope
 var websocket = null
-function enterGame(name, numplayers, playerid) {
-	game = new Game(numplayers, playerid, new Network(websocket, startFunc), sendmess)
-}
-function startFunc(latency) {
-	console.log("About to start the game with a latency adjustment of " +latency)
-	game.adjustTimer(-latency)
-	update()
-}
 function update() {
 	requestAnimationFrame(update)
 	if(!debug || debug && game.pointerIsLocked) {		// Pause on mouse blur while not debugging
@@ -48,6 +44,14 @@ function update() {
 		game.update(ctx, canvas.width, canvas.height)
 		renderer.render(game.graphics.scene, game.graphics.activeplayer.camera)
 	}
+}
+function startFunc(latency) {
+	console.log("About to start the game with a latency adjustment of " +latency)
+	game.adjustTimer(-latency)
+	update()
+}
+function enterGame(name, numplayers, playerid) {
+	game = new Game(numplayers, playerid, new Network(websocket, startFunc), sendmess)
 }
 
 if (location.protocol === "file:" || debug) {

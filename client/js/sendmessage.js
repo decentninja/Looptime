@@ -1,3 +1,5 @@
+"strict mode";
+
 //heavily inspired by SendMessage in Unity, might be useful to tie graphics to things
 
 /*

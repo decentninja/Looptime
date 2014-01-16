@@ -1,3 +1,5 @@
+"strict mode";
+
 var TIMEWAVE_SNAP = 240 //roughly 4 seconds
 
 /*
@@ -95,8 +97,8 @@ Timeline.prototype.saveState = function(time, state) {
 	this.states[index] = deepCopy(state)
 }
 
-Timeline.prototype.ensurePlayerAt = function(time, player) {
-	var player = deepCopy(player)
+Timeline.prototype.ensurePlayerAt = function(time, p) {
+	var player = deepCopy(p)
 	player.version++
 	if (!this.arrivals[time])
 		this.arrivals[time] = []
@@ -145,7 +147,7 @@ Timeline.prototype.jump = function(time, timewave) {
 	}
 
 	// There was no timewave at the target time, jump to the closest saved state
-	index = Math.floor(time/this.stateFrequency)
+	var index = Math.floor(time/this.stateFrequency)
 	timewave.state = deepCopy(this.states[index])
   if (this.arrivals[time]) {
     timewave.state.players.push.apply(timewave.state.players, deepCopy(this.arrivals[time]))
@@ -194,7 +196,7 @@ Timeline.prototype.addAndReplayEvents = function(events, timewave) {
 	var s = timewave
 	while (this.timewaves[j]) {
 		var f = this.timewaves[j]
-		var branchpoint = Math.floor(p.time + p.speed*(f.time - p.time)/(p.speed - f.speed))
+		var branchpoint = Math.floor(s.time + s.speed*(f.time - s.time)/(s.speed - f.speed))
 		if (branchpoint >= event.time) {
 			if (!branchpoints[branchpoint])
 				branchpoints[branchpoint] = []

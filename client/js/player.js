@@ -1,3 +1,7 @@
+"strict mode";
+
+var PLAYER_SPEED = 0.1
+
 /*
 	Player state at one tick
  */
@@ -63,7 +67,7 @@ Player.prototype.update = function(deltatime, map) {
 	quaternion.setFromEuler(this.look)
 	change.applyQuaternion(quaternion)
 	
-	change.y = 0 		// No fly
+	change.y = 0		// No fly
 	change.normalize()
 
 	var ray = new THREE.Raycaster(this.position, new THREE.Vector3(), 0, 5)
@@ -108,7 +112,7 @@ function PlayerEvent(event) {
 			this.mouse.multiplyScalar(-0.002)
 			break
 		case "mouseup":
-			if(event.button == 2) {
+			if(event.button === 2) {
 				this.type = "shield"
 				this.change = false
 			}
