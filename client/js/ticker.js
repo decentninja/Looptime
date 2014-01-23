@@ -147,11 +147,14 @@ Ticker.prototype.handleFireEvent = function(time, state, player) {
   /*
     Will use this until we see performance problems
    */
-  var gun = new THREE.Vector3(0, 8.8, 0)
-  gun.add(player.position)
+  var pModel = new PlayerModel(player.id, player.version)
+  pModel.update(player)
+  pModel.updateMatrixWorld()
+  var originPoint = new THREE.Vector3()
+  originPoint.getPositionFromMatrix(pModel.getObjectByName("shotorigin", true).matrixWorld)
 
   var ray = new THREE.Raycaster()
-  ray.set(gun, player.getLookDirection())
+  ray.set(originPoint, player.getLookDirection())
 
   var targets = []
   state.players.forEach(function(other) {
@@ -178,14 +181,14 @@ Ticker.prototype.handleFireEvent = function(time, state, player) {
     this.sendmess.send(time, "onHit", {
       player: player,
       target: target,
-      originPoint: gun,
+      originPoint: originPoint,
       hitPoint: hit[0].point,
     })
     state.players.splice(i, 1)
   } else {
     this.sendmess.send(time, "onMiss", {
       player: player,
-      originPoint: gun,
+      originPoint: originPoint,
       direction: player.getLookDirection(),
     })
   }

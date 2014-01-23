@@ -183,6 +183,15 @@ function PlayerModel(id, version) {
 	}
 	var loader = new THREE.OBJLoader(manager)
 	var that = this
+
+	var shotorigin = new THREE.Object3D()
+	shotorigin.name = "shotorigin" // get by using getObjectByName("shotorigin")
+	this.camera.add(shotorigin)
+	shotorigin.position.x = 1.75
+	shotorigin.position.z = -6.5
+	shotorigin.position.y = -1
+
+	//TODO: don't load this when only used for collision
 	loader.load("assets/grandfather_gun.obj", function(gun) {
 		that.camera.add(gun)
 		gun.position.z = -2
