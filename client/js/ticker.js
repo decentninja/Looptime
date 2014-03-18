@@ -151,7 +151,7 @@ Ticker.prototype.handleFireEvent = function(time, state, player) {
   pModel.update(player)
   pModel.updateMatrixWorld()
   var originPoint = new THREE.Vector3()
-  originPoint.getPositionFromMatrix(pModel.getObjectByName("shotorigin", true).matrixWorld)
+  originPoint.setFromMatrixPosition(pModel.getObjectByName("shotorigin", true).matrixWorld)
 
   var ray = new THREE.Raycaster()
   ray.set(originPoint, player.getLookDirection())
