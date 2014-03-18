@@ -1,12 +1,17 @@
 "strict mode";
 
-var PLAYER_SPEED = 0.1
+var PLAYER_SPEED = 0.02
+var FRICTION = .9
+var GRAVITY = -0.002
+var CAPSULE_RADIUS = 2.5
+var NUDGE = 0.01
+var SNAP_DISTANCE = 2
 
 /*
 	Player state at one tick
  */
 function Player(id, version) {
-	this.position = new THREE.Vector3(0, 0, 0)
+	this.position = new THREE.Vector3(0, 300, 0)
 	this.movement = {
 		forward: 0,
 		back: 0,
@@ -14,9 +19,11 @@ function Player(id, version) {
 		right: 0
 	}
 	this.look = new THREE.Euler()
+	this.velocity = new THREE.Vector3()
 	this.look.reorder("YXZ")
 	this.id = id
 	this.version = version | 0
+	this.grounded = false
 	this.shieldUp = false
 }
 
@@ -57,46 +64,68 @@ Player.prototype.getLookDirection = function() {
 	return direction
 }
 
-Player.prototype.update = function(deltatime, map) {
-	var change = new THREE.Vector3(
-		this.movement.right - this.movement.left,
-		0,
-		this.movement.back - this.movement.forward
-	)
-	var quaternion = new THREE.Quaternion()
-	quaternion.setFromEuler(this.look)
-	change.applyQuaternion(quaternion)
-	
-	change.y = 0		// No fly
-	change.normalize()
+Player.prototype.update = function(deltatime, collisionMap) {
+	if (this.grounded) {
+		var acceleration = new THREE.Vector3(
+			this.movement.right - this.movement.left,
+			0,
+			this.movement.back - this.movement.forward
+		)
+		var quaternion = new THREE.Quaternion()
+		quaternion.setFromEuler(this.look)
+		acceleration.applyQuaternion(quaternion)
 
-	var ray = new THREE.Raycaster(this.position, new THREE.Vector3(), 0, 5)
+		acceleration.y = 0		// No fly
+		acceleration.setLength(PLAYER_SPEED * deltatime)
+		this.velocity.add(acceleration)
+		this.velocity.multiplyScalar(FRICTION)
+	} else {
+		//TODO> whatever we want to do while in the air
+	}
 
-	var dirs = [
-        new THREE.Vector3(0, 0, 1),
-        new THREE.Vector3(1, 0, 1),
-        new THREE.Vector3(1, 0, 0),
-        new THREE.Vector3(1, 0, -1),
-        new THREE.Vector3(0, 0, -1),
-        new THREE.Vector3(-1, 0, -1),
-        new THREE.Vector3(-1, 0, 0),
-        new THREE.Vector3(-1, 0, 1)
-	]
-	change.setLength(PLAYER_SPEED * deltatime)
-	dirs.forEach(function(dir) {
-		ray.set(this.position, dir)
-		var col = ray.intersectObject(map.testcube, false)
-		if(col.length !== 0) {
-			if(dir.x) {
-				dir.multiplyScalar(Math.abs(change.x))
-			}
-			if(dir.z) {
-				dir.multiplyScalar(Math.abs(change.z))
-			}
-			change.sub(dir)
+	this.velocity.y += GRAVITY * deltatime
+
+	var change = this.velocity.clone()
+
+	var from = this.position.clone()
+	var direction = this.velocity.clone().normalize()
+	//direction.y -= CAPSULE_RADIUS
+	//from.y += CAPSULE_RADIUS
+	var ray = new THREE.Raycaster(from, direction, 0, change.length() + NUDGE)
+
+	var hits = ray.intersectObject(collisionMap, true)
+	if (hits.length > 0) {
+		var more = change.clone()
+		more.setLength(hits[0].distance)
+		more.projectOnVector(hits[0].face.normal)
+		change.projectOnPlane(hits[0].face.normal)
+		change.add(more)
+		this.grounded = true
+		if(this.velocity.y < 0) {
+			this.velocity.y = 0
 		}
-	}, this)
+		change.add(hits[0].face.normal.clone().multiplyScalar(NUDGE))
+	} else {
+		//TODO cast down and stuff
+		if(this.grounded) {
+			from.add(change)
+			from.y += CAPSULE_RADIUS
+			ray.set(from, new THREE.Vector3(0, -1, 0)) //TODO set near and far
+			ray.far = CAPSULE_RADIUS + SNAP_DISTANCE
+			hits = ray.intersectObject(collisionMap, true)
+			if(hits.length > 0) {
+				change.y -= hits[0].distance - CAPSULE_RADIUS - NUDGE
+			} else {
+				this.grounded = false
+			}
+		}
+	}
 	this.position.add(change)
+	//TODO raytrace, if hit, move there set grounded
+	//if not and grounded trace down, if hit move done else set grounded to false
+
+
+	this.position.add(this.velocity) //deltatime?
 }
 
 /*

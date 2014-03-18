@@ -45,10 +45,35 @@ function Lobby() {
 
 	// Collition test cube
 	this.testcube = new THREE.Mesh(new THREE.CubeGeometry(20, 20, 50))
-	this.testcube.position.y = 10
+	this.testcube.position.y = 0
 	this.testcube.position.x = 30
-	this.testcube.material.side = THREE.DoubleSide
+	this.testcube.rotation.x = Math.PI / 8
 	this.add(this.testcube)
 }
 
 Lobby.prototype = Object.create(THREE.Object3D.prototype)
+
+
+function MapCollider() {
+	THREE.Object3D.call(this)
+
+	var sphere = new THREE.Mesh(
+		new THREE.SphereGeometry(50, 16, 16))
+	sphere.position.z = -300
+	this.add(sphere)
+
+	var floorGeo = new THREE.PlaneGeometry(2000, 2000)
+	floorGeo.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) )
+	var floor = new THREE.Mesh(floorGeo)
+	this.add(floor)
+
+	this.testcube = new THREE.Mesh(new THREE.CubeGeometry(20, 20, 50))
+	this.testcube.position.y = 0
+	this.testcube.position.x = 30
+	this.testcube.rotation.x = Math.PI / 8
+	this.add(this.testcube)
+
+	this.updateMatrixWorld()
+}
+
+MapCollider.prototype = Object.create(THREE.Object3D.prototype)

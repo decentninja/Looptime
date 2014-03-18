@@ -9,8 +9,8 @@ function Ticker() {
   this.controlled = [] //should be set externally
 }
 
-Ticker.prototype.connect = function(map, timeline, sendmess) {
-  this.map = map
+Ticker.prototype.connect = function(collisionMap, timeline, sendmess) {
+  this.collisionMap = collisionMap
   this.timeline = timeline
   this.sendmess = sendmess
 }
@@ -34,7 +34,7 @@ Ticker.prototype.tick = function(time, state, events, latestAcceptableTime) {
     }, this)
   }
   state.players.forEach(function(player) {
-    player.update(1000/TARGET_FRAMERATE, this.map)
+    player.update(1000/TARGET_FRAMERATE, this.collisionMap)
   }, this)
   state.jumptimers.forEach(function(timer) {
     timer.timeLeft--

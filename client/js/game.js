@@ -23,6 +23,7 @@ function Game(numplayers, playerid, network, sendmess) {
 	this.startDelayLeft = START_DELAY
 
 	var map = new Lobby()
+	var mapCollider = new MapCollider()
 	this.timeline = new Timeline(SAVE_STATE_COUNT, SAVE_STATE_RATE, initialState)
 	this.ticker = new Ticker()
 	this.graphics = new Graphics(playerid)
@@ -53,7 +54,7 @@ function Game(numplayers, playerid, network, sendmess) {
 
 	// Connect everything
 	this.timeline.connect(this.timemap, this.ticker, sendmess)
-	this.ticker.connect(map, this.timeline, sendmess)
+	this.ticker.connect(mapCollider, this.timeline, sendmess)
 	this.timemap.connect(this.timeline)
 	this.graphics.connect(map, playerwave)
 	this.input.connect(this.timeline, playerwave, sendmess)
