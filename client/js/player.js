@@ -3,7 +3,8 @@
 var PLAYER_SPEED = 0.02
 var FRICTION = .9
 var GRAVITY = -0.002
-var CAPSULE_RADIUS = 2.5
+var HEAD_HEIGHT = 10
+var STEP_HEIGHT = 2.5
 var NUDGE = 0.01
 var SNAP_DISTANCE = 2
 
@@ -86,46 +87,40 @@ Player.prototype.update = function(deltatime, collisionMap) {
 	this.velocity.y += GRAVITY * deltatime
 
 	var change = this.velocity.clone()
+	var horChange = new THREE.Vector3(change.x, 0, change.z)
 
 	var from = this.position.clone()
-	var direction = this.velocity.clone().normalize()
-	//direction.y -= CAPSULE_RADIUS
-	//from.y += CAPSULE_RADIUS
+	var direction = horChange.clone().normalize()
+	//direction.y -= HEAD_HEIGHT
+	from.y += STEP_HEIGHT
 	var ray = new THREE.Raycaster(from, direction, 0, change.length() + NUDGE)
 
 	var hits = ray.intersectObject(collisionMap, true)
 	if (hits.length > 0) {
-		var more = change.clone()
-		more.setLength(hits[0].distance)
-		more.projectOnVector(hits[0].face.normal)
-		change.projectOnPlane(hits[0].face.normal)
-		change.add(more)
-		this.grounded = true
-		if(this.velocity.y < 0) {
-			this.velocity.y = 0
-		}
-		change.add(hits[0].face.normal.clone().multiplyScalar(NUDGE))
-	} else {
-		//TODO cast down and stuff
-		if(this.grounded) {
-			from.add(change)
-			from.y += CAPSULE_RADIUS
-			ray.set(from, new THREE.Vector3(0, -1, 0)) //TODO set near and far
-			ray.far = CAPSULE_RADIUS + SNAP_DISTANCE
-			hits = ray.intersectObject(collisionMap, true)
-			if(hits.length > 0) {
-				change.y -= hits[0].distance - CAPSULE_RADIUS - NUDGE
-			} else {
-				this.grounded = false
-			}
-		}
+		horChange.setLength(hits[0].distance - NUDGE)
+		change.x = horChange.x
+		change.z = horChange.z
 	}
+
+	from.add(horChange)
+	from.y += HEAD_HEIGHT - STEP_HEIGHT
+	ray.set(from, new THREE.Vector3(0, -1, 0)) //TODO set near and far
+	if (this.grounded) {
+		ray.far = HEAD_HEIGHT + SNAP_DISTANCE
+	} else {
+		ray.far = HEAD_HEIGHT - change.y
+	}
+	hits = ray.intersectObject(collisionMap, true)
+	if(hits.length > 0) {
+		change.y -= hits[0].distance - HEAD_HEIGHT - NUDGE
+		this.grounded = true	
+	} else {
+		this.grounded = false
+	}
+	
 	this.position.add(change)
 	//TODO raytrace, if hit, move there set grounded
 	//if not and grounded trace down, if hit move done else set grounded to false
-
-
-	this.position.add(this.velocity) //deltatime?
 }
 
 /*
