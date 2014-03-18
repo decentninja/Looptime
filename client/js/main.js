@@ -6,7 +6,7 @@
 	DOM stuff, start and global debugging hooks
  */
 
-var debug = location.search === "?debug=true"
+var debug = location.protocol === "file:" || location.search === "?debug=true"
 
 var el = document.querySelector("#game")
 var renderer = new THREE.WebGLRenderer({
@@ -39,11 +39,9 @@ var game = null				// Game logic scope
 var websocket = null
 function update() {
 	requestAnimationFrame(update)
-	if(!debug || debug && game.pointerIsLocked) {		// Pause on mouse blur while not debugging
-		ctx.clearRect(0, 0, canvas.width, canvas.height)
-		game.update(ctx, canvas.width, canvas.height)
-		renderer.render(game.graphics.scene, game.graphics.activeplayer.camera)
-	}
+	ctx.clearRect(0, 0, canvas.width, canvas.height)
+	game.update(ctx, canvas.width, canvas.height)
+	renderer.render(game.graphics.scene, game.graphics.activeplayer.camera)
 }
 function startFunc(latency) {
 	console.log("About to start the game with a latency adjustment of " +latency)
@@ -54,7 +52,7 @@ function enterGame(name, numplayers, playerid) {
 	game = new Game(numplayers, playerid, new Network(websocket, startFunc), sendmess)
 }
 
-if (location.protocol === "file:" || debug) {
+if (debug) {
 	enterGame("lobby", 1, 0)		// The lobby is also a game map but without networking
 	startFunc(START_DELAY) // Constant borrowed from game.js
 } else {
