@@ -13,12 +13,7 @@ var SNAP_DISTANCE = 2
  */
 function Player(id, version) {
 	this.position = new THREE.Vector3(0, 300, 0)
-	this.movement = {
-		forward: 0,
-		back: 0,
-		left: 0,
-		right: 0
-	}
+	this.stop()
 	this.look = new THREE.Euler()
 	this.velocity = new THREE.Vector3()
 	this.look.reorder("YXZ")
@@ -26,6 +21,15 @@ function Player(id, version) {
 	this.version = version | 0
 	this.grounded = false
 	this.shieldUp = false
+}
+
+Player.prototype.stop = function() {
+	this.movement = {
+		forward: 0,
+		back: 0,
+		left: 0,
+		right: 0
+	}
 }
 
 /*

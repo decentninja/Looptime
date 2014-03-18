@@ -81,6 +81,7 @@ Ticker.prototype.handleJumpEvent = function(time, state, event) {
   for (var i = 0; i < state.players.length; i++) {
     if (state.players[i].id !== event.id || state.players[i].version !== event.version)
       continue
+    state.players[i].stop()
     this.sendmess.send(time, "onJumpInitiated", {
       id: event.id,
       version: event.version,
