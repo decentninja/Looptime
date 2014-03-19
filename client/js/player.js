@@ -85,20 +85,19 @@ Player.prototype.update = function(deltatime, collisionMap) {
 		this.velocity.add(acceleration)
 		this.velocity.multiplyScalar(FRICTION)
 	} else {
-		//TODO> whatever we want to do while in the air
+		//TODO: whatever we want to do while in the air
 	}
 
 	this.velocity.y += GRAVITY * deltatime
 
 	var change = this.velocity.clone()
-	var horChange = new THREE.Vector3(change.x, 0, change.z)
 
+	var horChange = new THREE.Vector3(change.x, 0, change.z)
 	var from = this.position.clone()
 	var direction = horChange.clone().normalize()
-	//direction.y -= HEAD_HEIGHT
 	from.y += STEP_HEIGHT
-	var ray = new THREE.Raycaster(from, direction, 0, change.length() + NUDGE)
 
+	var ray = new THREE.Raycaster(from, direction, 0, change.length() + NUDGE)
 	var hits = ray.intersectObject(collisionMap, true)
 	if (hits.length > 0) {
 		horChange.setLength(hits[0].distance - NUDGE)
@@ -108,7 +107,7 @@ Player.prototype.update = function(deltatime, collisionMap) {
 
 	from.add(horChange)
 	from.y += HEAD_HEIGHT - STEP_HEIGHT
-	ray.set(from, new THREE.Vector3(0, -1, 0)) //TODO set near and far
+	ray.set(from, new THREE.Vector3(0, -1, 0))
 	if (this.grounded) {
 		ray.far = HEAD_HEIGHT + SNAP_DISTANCE
 	} else {
@@ -123,8 +122,6 @@ Player.prototype.update = function(deltatime, collisionMap) {
 	}
 	
 	this.position.add(change)
-	//TODO raytrace, if hit, move there set grounded
-	//if not and grounded trace down, if hit move done else set grounded to false
 }
 
 /*
