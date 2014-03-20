@@ -8,6 +8,7 @@ var STEP_HEIGHT = 2.5
 var NUDGE = 0.01
 var SNAP_DISTANCE = 2
 var JUMP_HEIGHT = 2
+var PLAYER_THICKNESS = 2
 
 /*
 	Player state at one tick
@@ -99,10 +100,10 @@ Player.prototype.update = function(deltatime, collisionMap) {
 	var direction = horChange.clone().normalize()
 	from.y += STEP_HEIGHT
 
-	var ray = new THREE.Raycaster(from, direction, 0, change.length() + NUDGE)
+	var ray = new THREE.Raycaster(from, direction, 0, change.length() + NUDGE + PLAYER_THICKNESS)
 	var hits = ray.intersectObject(collisionMap, true)
 	if (hits.length > 0) {
-		horChange.setLength(hits[0].distance - NUDGE)
+		horChange.setLength(hits[0].distance - NUDGE - PLAYER_THICKNESS)
 		change.x = horChange.x
 		change.z = horChange.z
 	}
@@ -118,7 +119,7 @@ Player.prototype.update = function(deltatime, collisionMap) {
 	hits = ray.intersectObject(collisionMap, true)
 	if(hits.length > 0) {
 		change.y -= hits[0].distance - HEAD_HEIGHT - NUDGE
-		this.grounded = true	
+		this.grounded = true
 	} else {
 		this.grounded = false
 	}
