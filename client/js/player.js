@@ -1,8 +1,8 @@
 "strict mode";
 
-var PLAYER_SPEED = 0.02
+var PLAYER_SPEED = 0.012
 var FRICTION = .9
-var GRAVITY = -0.002
+var GRAVITY = -0.003
 var HEAD_HEIGHT = 10
 var STEP_HEIGHT = 2.5
 var NUDGE = 0.01
@@ -189,13 +189,13 @@ function PlayerModel(id, version) {
 	THREE.Object3D.call(this)
 	this.id = id
 	this.version = version
-	this.body = new THREE.Mesh(new THREE.CubeGeometry(5, 10, 5))
+	this.body = new THREE.Mesh(new THREE.CubeGeometry(7.5, 20, 7.5))
 	this.body.position.y = 8
 	this.add(this.body)
 
 	this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000000)
 	this.body.add(this.camera)
-	this.camera.position.y = 3
+	this.camera.position.y = 8
 
 	var manager = new THREE.LoadingManager()
 	manager.onProgress = function(item, loaded, total) {

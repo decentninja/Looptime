@@ -23,7 +23,7 @@ function Lobby() {
 	if(debug) {
 		var collision = new THREE.Mesh(assets["collision map"].geometry)
 		collision.scale.multiplyScalar(300)
-		collision.position.y -= 1400.01
+		collision.position.y -= 1401
 		this.add(collision)
 	}
 
