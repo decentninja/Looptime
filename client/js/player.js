@@ -200,7 +200,7 @@ function PlayerModel(id, version) {
 
 	this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000000)
 	this.body.add(this.camera)
-	this.camera.position.y = 1.8
+	this.camera.position.y = 3
 
 	var manager = new THREE.LoadingManager()
 	manager.onProgress = function(item, loaded, total) {
@@ -219,6 +219,7 @@ function PlayerModel(id, version) {
 	this.camera.add(gun)
 	gun.position.z = -2
 	gun.position.y = -1
+	gun.material = new THREE.MeshNormalMaterial()
 	gun.position.x = -1.5
 	gun.scale.multiplyScalar(1.5)
 	gun.rotation.y = -Math.PI / 2
