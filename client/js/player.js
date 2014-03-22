@@ -206,7 +206,6 @@ function PlayerModel(id, version) {
 	manager.onProgress = function(item, loaded, total) {
 		console.log(item, loaded, total)
 	}
-	var loader = new THREE.OBJLoader(manager)
 	var that = this
 
 	var shotorigin = new THREE.Object3D()
@@ -216,15 +215,13 @@ function PlayerModel(id, version) {
 	shotorigin.position.z = -6.5
 	shotorigin.position.y = -1
 
-	//TODO: don't load this when only used for collision
-	loader.load("assets/grandfather_gun.obj", function(gun) {
-		that.camera.add(gun)
-		gun.position.z = -2
-		gun.position.y = -1
-		gun.position.x = -1.5
-		gun.scale.multiplyScalar(1.5)
-		gun.rotation.y = -Math.PI / 2
-	})
+	var gun = new THREE.Mesh(assets["grandfather gun"].geometry)
+	this.camera.add(gun)
+	gun.position.z = -2
+	gun.position.y = -1
+	gun.position.x = -1.5
+	gun.scale.multiplyScalar(1.5)
+	gun.rotation.y = -Math.PI / 2
 }
 
 PlayerModel.prototype = Object.create(THREE.Object3D.prototype)

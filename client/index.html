@@ -3,6 +3,7 @@
 		<meta charset="utf-8">
 		<link rel="stylesheet" href="lib/normalize.css">
 		<link rel="stylesheet" href="style.css">
+		<title>Looptime - a  non-linear multiplayer fps game</title>
 	</head>
 	<body>
 		<div class="map">
@@ -15,10 +16,17 @@
 			<span class="info"></span>
 		</div>
 		<canvas id="game"></canvas>
+
+		<!-- Libs -->
 		<script src="lib/three.js"></script>
 		<script src="lib/OBJLoader.js"></script>
 		<script src="lib/optimer_regular.typeface.js"></script>
 		<script src="lib/deepcopy.js"></script>
+
+		<!-- Assets -->
+		<script id="gun" src="assets/grandfather_gun.js"></script>
+
+		<!-- Source -->
 		<script src="js/lobby.js"></script>
 		<script src="js/game.js"></script>
 		<script src="js/sendmessage.js"></script>
