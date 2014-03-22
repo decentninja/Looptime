@@ -49,6 +49,19 @@ function Lobby() {
 	this.testcube.position.x = 30
 	this.testcube.rotation.x = Math.PI / 8
 	this.add(this.testcube)
+
+	/*var images = [
+	    'posx.jpg', 'negx.jpg',
+	    'posy.jpg', 'negy.jpg',
+	    'posz.jpg', 'negz.jpg',
+	].map(function(o) {
+		return "assets/Skansen2/" + o
+	})
+	var textureCube = THREEx.createTextureCube(images)
+	console.log(textureCube)*/
+	var mesh = THREEx.createSkymap("skybox")
+	mesh.scale.multiplyScalar(1000)
+	this.add(mesh)
 }
 
 Lobby.prototype = Object.create(THREE.Object3D.prototype)
