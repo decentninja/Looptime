@@ -31,3 +31,4 @@ TODO
 - make something graphically pleasing when the start delay is happening
 - make the gun a MeshPhongMaterial with envMap for shinynesss
 - mark killer waves in timemap
+- integrate effects from assets/material/index.html
