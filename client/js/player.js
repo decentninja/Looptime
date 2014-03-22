@@ -56,7 +56,7 @@ Player.prototype.evaluate = function(time, event, sendmess) {
 		case "hop":
 			if(this.grounded) {
 				this.grounded = false
-				this.velocity.y += JUMP_HEIGHT
+				this.velocity.y = JUMP_HEIGHT
 			}
 			break
 	}

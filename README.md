@@ -10,7 +10,7 @@ Setup
 1. http://golang.org/doc/install
 2. git clone https://github.com/sootn/Looptime
 3. cd Looptime
-4. go install
+4. go get
 5. go run main.go
 6. open http://localhost:9000
 
