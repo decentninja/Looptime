@@ -2,3 +2,8 @@
 - improve handling of timewave wraparound
 - disable jumping to the current time, I think it breaks things
 - make something graphically pleasing when the start delay is happening
+
+- import map
+- create collision map
+- improve time-mini-map
+- make the gun a MeshPhongMaterial with envMap for shinynesss
