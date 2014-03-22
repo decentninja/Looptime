@@ -36,7 +36,7 @@ Timemap.prototype.readState = function(time, state) {
       }
     }
     if (!version) {
-      version = new Existance(sPlayer.version)
+      version = new Existance(sPlayer.version, sPlayer.id)
       this.players[sPlayer.id].push(version)
     }
     if (!version)
@@ -52,10 +52,11 @@ Timemap.prototype.readState = function(time, state) {
   }
 }
 
-function Existance(version) {
+function Existance(version, id) {
   this.version = version
   this.blocks = []
   this.affected = false
+  this.id = id
 }
 
 Existance.prototype.existAt = function(time) {
@@ -153,39 +154,48 @@ ExistanceBlock.prototype.length = function() {
 
 Timemap.prototype.render = function(ctx, width, height) {
   var totaltime = SAVE_STATE_COUNT * SAVE_STATE_RATE // Constants borrowed from game.js
-
   // Paint players
   this.players.forEach(function(player) {
-    ctx.fillStyle = "rgba(0, 0, 200, 0.5)" //TODO: pick up player color somehow
     player.forEach(function(version, i) {
+      ctx.fillStyle = "rgba(" + 100*version.id + ", 60, 80, 0.5)"
       var row = Math.max(0, i - Math.max(0, player.length - VERSIONS_TO_DISPLAY))
       version.blocks.forEach(function(block) {
         ctx.fillRect(
           width * block.start / totaltime,
-          (height-12) * row / Math.min(player.length, VERSIONS_TO_DISPLAY),
+          (height-24) * row / Math.min(player.length, VERSIONS_TO_DISPLAY),
           width * block.length() / totaltime,
-          (height-12) / Math.min(player.length, VERSIONS_TO_DISPLAY)
+          (height-24) / Math.min(player.length, VERSIONS_TO_DISPLAY)
         )
       })
     })
-  })
+  }, this)
+
+  // Scale
+  for(var i = 0; i <= totaltime; i += totaltime / 4) {
+    ctx.font = "10pt Helvetica"
+    ctx.textAlign = "center"
+    ctx.fillStyle = "rgba(0, 0, 0, 1)"
+    ctx.fillText(Math.round(i / 60), width * i / totaltime, height - 12)
+  }
 
   // Paint waves and cursor
   var timeline = this.timeline
-  function marker(time, snap) {
+  function marker(time, snap, color, text) {
     var position
     if (snap)
       position = width * timeline.calcJumpTarget(time, 0) / totaltime
     else
       position = width * time / totaltime
-    ctx.fillStyle = "black"
-    ctx.fillRect(position, 0, 2, height-12)
-    ctx.textAlign = "center"
-    ctx.font = "10pt Helvetica"
-    ctx.fillText(Math.round(time/60), position, height)
+    ctx.fillStyle = color
+    ctx.fillRect(position, 0, 2, height-24)
+    if(text) {
+      ctx.textAlign = "center"
+      ctx.font = "10pt Helvetica"
+      ctx.fillText(Math.round(time/60), position, height)
+    }
   }
-  marker(this.timecursor, true)
+  marker(this.timecursor, true, "red", true)
   this.timeline.timewaves.forEach(function(timewave) {
-    marker(timewave.time, false)
+    marker(timewave.time, false, "black", false)
   })
 }

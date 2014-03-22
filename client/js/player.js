@@ -1,6 +1,6 @@
 "strict mode";
 
-var PLAYER_SPEED = 0.012
+var PLAYER_SPEED = 0.02
 var FRICTION = .9
 var GRAVITY = -0.003
 var HEAD_HEIGHT = 10
@@ -189,7 +189,7 @@ function PlayerModel(id, version) {
 	THREE.Object3D.call(this)
 	this.id = id
 	this.version = version
-	this.body = new THREE.Mesh(new THREE.CubeGeometry(7.5, 20, 7.5))
+	this.body = new THREE.Mesh(new THREE.CubeGeometry(7.5, 25, 7.5))
 	this.body.position.y = 8
 	this.add(this.body)
 
