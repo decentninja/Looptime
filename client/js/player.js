@@ -7,6 +7,7 @@ var HEAD_HEIGHT = 10
 var STEP_HEIGHT = 2.5
 var NUDGE = 0.01
 var SNAP_DISTANCE = 2
+var JUMP_HEIGHT = 2
 
 /*
 	Player state at one tick
@@ -20,7 +21,6 @@ function Player(id, version) {
 	this.id = id
 	this.version = version | 0
 	this.grounded = false
-	this.shieldUp = false
 }
 
 Player.prototype.stop = function() {
@@ -37,10 +37,6 @@ Player.prototype.stop = function() {
  */
 Player.prototype.evaluate = function(time, event, sendmess) {
 	switch(event.type) {
-		case "shield":
-			this.shieldUp = event.change
-			console.log("shield", this.shieldUp ? "up" : "down")
-			break
 		case "mousemove":
 			this.look.x += event.mouse.x
 			this.look.y += event.mouse.y
@@ -55,6 +51,12 @@ Player.prototype.evaluate = function(time, event, sendmess) {
 		case "keyup":
 			for(var direction in event.movement) {
 				this.movement[direction] = event.movement[direction]
+			}
+			break
+		case "hop":
+			if(this.grounded) {
+				this.grounded = false
+				this.velocity.y += JUMP_HEIGHT
 			}
 			break
 	}
@@ -137,20 +139,10 @@ function PlayerEvent(event) {
 			this.mouse.multiplyScalar(-0.002)
 			break
 		case "mouseup":
-			if(event.button === 2) {
-				this.type = "shield"
-				this.change = false
-			}
 			break
 		case "mousedown":
-			switch(event.button) {
-				case 0:
-					this.type = "fire"
-					break
-				case 2:
-					this.type = "shield"
-					this.change = true
-					break
+			if(event.button == 0) {
+				this.type = "fire"
 			}
 			break
 		case "keydown":
@@ -181,6 +173,9 @@ function PlayerEvent(event) {
 				case 68: // d
 				case 69: // e (for dvorak)
 					this.movement.right = change
+					break
+				case 32: // Space
+					this.type = "hop"
 					break
 			}
 			break

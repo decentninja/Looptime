@@ -57,8 +57,8 @@ Input.prototype.onWindowInput = function(event) {
       this.sendmess.send(-1, "onTimecursorUpdate", this.timecursor)
       return    // Don't register in timeline
 
-    case "keydown":
-      if (event.keyCode === 32) {
+    case "mousedown":
+      if(event.button == 2) {
         internalEvent.type = "jump"
         internalEvent.jumptarget = this.timeline.calcJumpTarget(this.timecursor, TIMEJUMP_DELAY)
         this.inputIsAllowed = false
