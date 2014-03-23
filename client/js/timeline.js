@@ -67,8 +67,8 @@ Timeline.prototype.tick = function() {
 	this.timewaves.forEach(function(tickerwave, ti) {
 		while (tickerwave.ticksDoneThisTick < tickerwave.speed) {
 			tickerwave.tick(this.events[tickerwave.time], this.arrivals[tickerwave.time+1], this.ticker)
-			for (var i = ti + 1; i < this.timewaves.length && this.timewaves[i].time === tickerwave.time - 1; i++) {
-				if (this.timewaves[i].ticksDoneThisTick < this.timewaves[i].speed) {
+			for (var i = ti + 1; i < this.timewaves.length && this.timewaves[i].time <= tickerwave.time - 1; i++) {
+				if (this.timewaves[i].time === tickerwave.time - 1 && this.timewaves[i].ticksDoneThisTick < this.timewaves[i].speed) {
 					this.timewaves[i].noopTick(tickerwave.state)
 				}
 			}
