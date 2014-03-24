@@ -177,7 +177,7 @@ Timemap.prototype.render = function(ctx, width, height) {
   })
 
   // Scale
-  for(var i = 0; i <= totaltime; i += totaltime / 4) {
+  for(var i = 0; i <= totaltime; i += totaltime / 6) {
     ctx.font = "10pt Helvetica"
     ctx.textBaseline = "middle"
     ctx.textAlign = "right"
