@@ -157,8 +157,8 @@ Timemap.prototype.render = function(ctx, width, height) {
   // Paint players
   this.players.forEach(function(player) {
     player.forEach(function(version, i) {
-      ctx.fillStyle = "rgba(" + 100*version.id + ", 60, 80, 0.5)"
-      var col = Math.min(VERSIONS_TO_DISPLAY-1, i)
+      ctx.fillStyle = "rgba(" + 100*version.id + ", 60, 80, 0.6)"
+      var col = Math.min(VERSIONS_TO_DISPLAY-1, player.length - i - 1)
       version.blocks.forEach(function(block) {
         ctx.fillRect(
           25 + (width-25) * col / VERSIONS_TO_DISPLAY,
