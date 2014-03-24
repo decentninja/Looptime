@@ -5,7 +5,7 @@
 var VERSIONS_TO_DISPLAY = 5
 
 function Timemap() {
-  this.timecursor = 0
+  this.timecursor = -1
   this.players = []
 }
 
@@ -196,7 +196,8 @@ Timemap.prototype.render = function(ctx, width, height) {
       ctx.fillText(Math.round(time/60), 25, position)
     }
   }
-  marker(this.timecursor, true, "red", true)
+  if (this.timecursor >= 0)
+    marker(this.timecursor, true, "red", true)
   this.timeline.timewaves.forEach(function(timewave) {
     marker(timewave.time, false, "black", false)
   })

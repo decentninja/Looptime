@@ -7,7 +7,7 @@ function Input(playerid) {
   this.inputIsAllowed = true
   this.controlledId = playerid
   this.controlledVersion = 0
-  this.timecursor = 0
+  this.timecursor = -1
   this.metatime = 0
 }
 
@@ -42,6 +42,9 @@ Input.prototype.onWindowInput = function(event) {
   internalEvent.version = this.controlledVersion
   switch(event.type) {
     case "wheel":
+      if (this.timecursor < 0) {
+        this.timecursor = this.playerwave.time
+      }
       if (event.wheelDelta) {
         this.timecursor -= event.wheelDelta
       } else if (event.deltaY) {
@@ -58,14 +61,30 @@ Input.prototype.onWindowInput = function(event) {
       return    // Don't register in timeline
 
     case "mousedown":
-      if(event.button == 2) {
-        internalEvent.type = "jump"
-        internalEvent.jumptarget = this.timeline.calcJumpTarget(this.timecursor, TIMEJUMP_DELAY)
-        this.inputIsAllowed = false
+      switch (event.button) {
+        case 2:
+          if (this.timecursor >= 0) {
+            this.setTimecursor(-1)
+            return
+          }
+
+        case 0:
+          if (this.timecursor >= 0 ){
+            internalEvent.type = "jump"
+            internalEvent.jumptarget = this.timeline.calcJumpTarget(this.timecursor, TIMEJUMP_DELAY)
+            this.inputIsAllowed = false
+            this.setTimecursor(-1)
+          }
+          break
       }
       break
   }
   internalEvent.time = this.playerwave.time
   this.timeline.addEvent(internalEvent)
   this.sendmess.send(-1, "onAddedLocalEvent", internalEvent)
+}
+
+Input.prototype.setTimecursor = function(time) {
+  this.timecursor = time
+  this.sendmess.send(-1, "onTimecursorUpdate", this.timecursor)
 }
