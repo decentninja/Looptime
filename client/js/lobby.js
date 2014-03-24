@@ -30,20 +30,12 @@ function Lobby() {
 	var mesh = THREEx.createSkymap("skybox")
 	mesh.scale.multiplyScalar(1000)
 	this.add(mesh)
+
+	this.collision = new THREE.Mesh(assets["collision map"].geometry)
+	this.collision.scale.multiplyScalar(300)
+	this.collision.position.y -= 1400
+
+	this.collision.updateMatrixWorld()
 }
 
 Lobby.prototype = Object.create(THREE.Object3D.prototype)
-
-
-function MapCollider() {
-	THREE.Object3D.call(this)
-
-	var collision = new THREE.Mesh(assets["collision map"].geometry)
-	collision.scale.multiplyScalar(300)
-	collision.position.y -= 1400
-	this.add(collision)
-
-	this.updateMatrixWorld()
-}
-
-MapCollider.prototype = Object.create(THREE.Object3D.prototype)

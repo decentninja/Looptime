@@ -72,7 +72,7 @@ Player.prototype.getLookDirection = function() {
 	return direction
 }
 
-Player.prototype.update = function(deltatime, collisionMap) {
+Player.prototype.update = function(deltatime, collision) {
 	if (this.grounded) {
 		var acceleration = new THREE.Vector3(
 			this.movement.right - this.movement.left,
@@ -101,7 +101,7 @@ Player.prototype.update = function(deltatime, collisionMap) {
 	from.y += STEP_HEIGHT
 
 	var ray = new THREE.Raycaster(from, direction, 0, change.length() + NUDGE + PLAYER_THICKNESS)
-	var hits = ray.intersectObject(collisionMap, true)
+	var hits = ray.intersectObject(collision)
 	if (hits.length > 0) {
 		horChange.setLength(hits[0].distance - NUDGE - PLAYER_THICKNESS)
 		change.x = horChange.x
@@ -116,7 +116,7 @@ Player.prototype.update = function(deltatime, collisionMap) {
 	} else {
 		ray.far = HEAD_HEIGHT - change.y
 	}
-	hits = ray.intersectObject(collisionMap, true)
+	hits = ray.intersectObject(collision)
 	if(hits.length > 0) {
 		change.y -= hits[0].distance - HEAD_HEIGHT - NUDGE
 		this.grounded = true
