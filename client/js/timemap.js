@@ -161,9 +161,9 @@ Timemap.prototype.render = function(ctx, width, height) {
       var col = Math.min(VERSIONS_TO_DISPLAY-1, i)
       version.blocks.forEach(function(block) {
         ctx.fillRect(
-          25 + (width-25) * col / Math.min(player.length, VERSIONS_TO_DISPLAY),
+          25 + (width-25) * col / VERSIONS_TO_DISPLAY,
           height * block.start / totaltime,
-          (width-25) / Math.min(player.length, VERSIONS_TO_DISPLAY),
+          (width-25) / VERSIONS_TO_DISPLAY,
           height * block.length() / totaltime
         )
       })
