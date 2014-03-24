@@ -33,6 +33,7 @@ TODO
 - visual effect when jump in progress (as feedback)
 - some sort of shield
 - wrap playerwaves somehow (or kill players that exit the playtime)
+- block default action on right click
 
 ### (Presumably) Lower priority
 
