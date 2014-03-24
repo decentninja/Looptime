@@ -158,13 +158,13 @@ Timemap.prototype.render = function(ctx, width, height) {
   this.players.forEach(function(player) {
     player.forEach(function(version, i) {
       ctx.fillStyle = "rgba(" + 100*version.id + ", 60, 80, 0.5)"
-      var row = Math.max(0, i - Math.max(0, player.length - VERSIONS_TO_DISPLAY))
+      var col = Math.min(VERSIONS_TO_DISPLAY-1, i)
       version.blocks.forEach(function(block) {
         ctx.fillRect(
-          width * block.start / totaltime,
-          (height-24) * row / Math.min(player.length, VERSIONS_TO_DISPLAY),
-          width * block.length() / totaltime,
-          (height-24) / Math.min(player.length, VERSIONS_TO_DISPLAY)
+          25 + (width-25) * col / Math.min(player.length, VERSIONS_TO_DISPLAY),
+          height * block.start / totaltime,
+          (width-25) / Math.min(player.length, VERSIONS_TO_DISPLAY),
+          height * block.length() / totaltime
         )
       })
     })
@@ -173,9 +173,10 @@ Timemap.prototype.render = function(ctx, width, height) {
   // Scale
   for(var i = 0; i <= totaltime; i += totaltime / 4) {
     ctx.font = "10pt Helvetica"
-    ctx.textAlign = "center"
+    ctx.textBaseline = "middle"
+    ctx.textAlign = "right"
     ctx.fillStyle = "rgba(0, 0, 0, 1)"
-    ctx.fillText(Math.round(i / 60), width * i / totaltime, height - 12)
+    ctx.fillText(Math.round(i / 60), 25, height * i / totaltime)
   }
 
   // Paint waves and cursor
@@ -183,15 +184,16 @@ Timemap.prototype.render = function(ctx, width, height) {
   function marker(time, snap, color, text) {
     var position
     if (snap)
-      position = width * timeline.calcJumpTarget(time, 0) / totaltime
+      position = height * timeline.calcJumpTarget(time, 0) / totaltime
     else
-      position = width * time / totaltime
+      position = height * time / totaltime
     ctx.fillStyle = color
-    ctx.fillRect(position, 0, 2, height-24)
+    ctx.fillRect(25, position, width-25, 2)
     if(text) {
-      ctx.textAlign = "center"
+      ctx.textAlign = "right"
+      ctx.textBaseline = "center"
       ctx.font = "10pt Helvetica"
-      ctx.fillText(Math.round(time/60), position, height)
+      ctx.fillText(Math.round(time/60), 25, position)
     }
   }
   marker(this.timecursor, true, "red", true)
