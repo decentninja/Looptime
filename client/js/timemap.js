@@ -178,9 +178,14 @@ Timemap.prototype.render = function(ctx, width, height) {
 
   // Scale
   for(var i = 0; i <= totaltime; i += totaltime / 6) {
-    ctx.font = "10pt Helvetica"
     ctx.textBaseline = "middle"
     ctx.textAlign = "right"
+    if (i === 0) {
+      ctx.textBaseline = "top"
+    } else if (i === totaltime) {
+      ctx.textBaseline = "bottom"
+    }
+    ctx.font = "10pt Helvetica"
     ctx.fillStyle = "rgba(0, 0, 0, 1)"
     ctx.fillText(Math.round(i / 60), 25, height * i / totaltime)
   }
