@@ -2,12 +2,9 @@
 
 /* global SAVE_STATE_RATE, SAVE_STATE_COUNT */
 
-var VERSIONS_TO_DISPLAY = 5
-
 function Timemap() {
   this.timecursor = -1
   this.players = []
-  this.renderOffsets = []
 }
 
 Timemap.prototype.connect = function(timeline) {
@@ -28,7 +25,6 @@ Timemap.prototype.readState = function(time, state) {
     var sPlayer = state.players[i]
     if (!this.players[sPlayer.id]) {
       this.players[sPlayer.id] = []
-      this.renderOffsets[sPlayer.id] = 0
     }
 
     var version = null
@@ -41,7 +37,6 @@ Timemap.prototype.readState = function(time, state) {
     if (!version) {
       version = new Existance(sPlayer.version, sPlayer.id)
       this.players[sPlayer.id].push(version)
-      this.renderOffsets[sPlayer.id]--
     }
 
     version.existAt(time)
@@ -159,22 +154,18 @@ Timemap.prototype.render = function(ctx, width, height) {
   // Paint players
   var that = this
   this.players.forEach(function(player, id) {
-    player.forEach(function(version, i) {
+    player.forEach(function(version) {
       ctx.fillStyle = "rgba(" + 100*version.id + ", 60, 80, 0.6)"
-      var col = Math.min(VERSIONS_TO_DISPLAY, player.length - i) - 1
       version.blocks.forEach(function(block) {
         ctx.fillRect(
-          25 + (width-25) * (col + (player.length - i > VERSIONS_TO_DISPLAY ? 0 : that.renderOffsets[id])) / VERSIONS_TO_DISPLAY,
+          25 + (width-25) * id / that.players.length,
           height * block.start / totaltime,
-          (width-25) / VERSIONS_TO_DISPLAY,
+          (width-25) / that.players.length,
           height * block.length() / totaltime
         )
       })
     })
   }, this)
-  this.renderOffsets = this.renderOffsets.map(function(offset) {
-    return offset * 0.9
-  })
 
   // Scale
   for(var i = 0; i <= totaltime; i += totaltime / 6) {
