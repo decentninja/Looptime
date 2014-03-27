@@ -21,7 +21,7 @@ Graphics.prototype.onNewJumpSuccessful = function(id) {
     this.controlledVersion++
 }
 
-Graphics.prototype.onHit = function(hitInfo) {
+Graphics.prototype.onHit = function(hitInfo, ticksAgo) {
   var debugline = new THREE.Geometry()
   debugline.vertices.push(hitInfo.originPoint)
   debugline.vertices.push(hitInfo.hitPoint)
@@ -31,12 +31,12 @@ Graphics.prototype.onHit = function(hitInfo) {
     transparent: true,
     opacity: 0.5
   }))
-  line.life = 1000
+  line.life = 1000 - ticksAgo
   this.scene.add(line)
   this.timedlife.push(line)
 }
 
-Graphics.prototype.onMiss = function(missInfo) {
+Graphics.prototype.onMiss = function(missInfo, ticksAgo) {
   var debugline = new THREE.Geometry()
   debugline.vertices.push(missInfo.originPoint)
   var farAwayPoint = missInfo.direction.clone()
@@ -47,7 +47,7 @@ Graphics.prototype.onMiss = function(missInfo) {
     transparent: true,
     opacity: 0.5
   }))
-  line.life = 1000
+  line.life = 1000 - ticksAgo
   this.scene.add(line)
   this.timedlife.push(line)
 }

@@ -1,5 +1,8 @@
 "strict mode";
 
+/* global TIMEJUMP_DELAY */
+
+var MAX_TIME_GAP = TIMEJUMP_DELAY
 //heavily inspired by SendMessage in Unity, might be useful to tie graphics to things
 
 /*
@@ -33,15 +36,15 @@ SendMessage.prototype.register = function(receiver) {
   arg  - the argument to supply to the receiver
 */
 SendMessage.prototype.send = function(time, name, arg) {
-  if (time !== this.timewave.time && time >= 0)
+  if ((time < this.timewave.time - MAX_TIME_GAP || time > this.timewave.time) && time >= 0)
     return
   var received = false
   this.receivers.forEach(function(receiver) {
     if (typeof receiver[name] !== "function")
       return
     received = true
-    receiver[name].call(receiver, arg)
-  })
+    receiver[name].call(receiver, arg, this.timewave.time - time)
+  }, this)
   if (!received)
     console.warn("No receiver for message", name, arg)
 }
