@@ -1,5 +1,7 @@
 "strict mode";
 
+/* global TARGET_FRAMERATE */
+
 function Graphics(playerid) {
   this.controlledId = playerid
   this.controlledVersion = 0
@@ -31,7 +33,7 @@ Graphics.prototype.onHit = function(hitInfo, ticksAgo) {
     transparent: true,
     opacity: 0.5
   }))
-  line.life = 1000 - ticksAgo
+  line.life = 1000 - ticksAgo*1000/TARGET_FRAMERATE
   this.scene.add(line)
   this.timedlife.push(line)
 }
@@ -47,7 +49,7 @@ Graphics.prototype.onMiss = function(missInfo, ticksAgo) {
     transparent: true,
     opacity: 0.5
   }))
-  line.life = 1000 - ticksAgo
+  line.life = 1000 - ticksAgo*1000/TARGET_FRAMERATE
   this.scene.add(line)
   this.timedlife.push(line)
 }
