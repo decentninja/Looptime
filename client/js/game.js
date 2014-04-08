@@ -100,7 +100,6 @@ Game.prototype.adjustTimer = function(adjustment) {
 Game.prototype.advanceTime = function() {
 	while (this.deltatime >= 1000/TARGET_FRAMERATE) {	// Catch up
 		this.timeline.tick()
-		this.ticker.doDelayedJumps()
 		this.input.tick()
 		this.deltatime -= 1000/TARGET_FRAMERATE
 	}

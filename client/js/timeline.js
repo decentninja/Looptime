@@ -41,6 +41,7 @@ function Timeline(stateCount, stateFrequency, initialState) {
 		this.states[i] = initialState
 	this.stateCount = stateCount
 	this.stateFrequency = stateFrequency
+	this.jumps = []
 }
 
 Timeline.prototype.connect = function(timemap, ticker, sendmess) {
@@ -60,26 +61,45 @@ Timeline.prototype.createTimewave = function(time, speed, snap, wraparound) {
 	Move all timewaves according to their speed. Handle wave collision with noopTick's.
  */
 Timeline.prototype.tick = function() {
-	this.sortWaves()
 	this.timewaves.forEach(function(wave) {
 		wave.ticksDoneThisTick = 0
 	})
-	this.timewaves.forEach(function(tickerwave, ti) {
+	for (var ti = 0; ti < this.timewaves.length; ti++) {
+		var tickerwave = this.timewaves[ti]
 		while (tickerwave.ticksDoneThisTick < tickerwave.speed) {
 			tickerwave.tick(this.events[tickerwave.time], this.arrivals[tickerwave.time+1], this.ticker)
-			for (var i = ti + 1; i < this.timewaves.length && this.timewaves[i].time <= tickerwave.time - 1; i++) {
-				if (this.timewaves[i].time === tickerwave.time - 1 && this.timewaves[i].ticksDoneThisTick < this.timewaves[i].speed) {
-					this.timewaves[i].noopTick(tickerwave.state)
+			if (tickerwave.time <= this.stateFrequency * this.stateCount) {
+				//do noop ticks for all waves that were on the same time and that still have ticks to do
+				for (var i = 0; i < this.timewaves.length; i++) {
+					var wave = this.timewaves[i]
+					if (wave.time === tickerwave.time - 1 && wave.ticksDoneThisTick < wave.speed) {
+						wave.noopTick(tickerwave.state)
+					}
+				}
+				this.saveState(tickerwave.time, tickerwave.state)
+			} else {
+				if (tickerwave.wraparound) {
+					this.jump(0, tickerwave)
 				}
 			}
-			this.timemap.readTimelines()
-			this.saveState(tickerwave.time, tickerwave.state)
+			this.sendmess.send(-1, "onSmallTickDone")
 		}
+	}
+	this.doPreparedJumps()
+	this.sortWaves()
+}
+
+Timeline.prototype.prepareJump = function(time, timewave) {
+	this.jumps.push({time: time, wave: timewave})
+}
+
+Timeline.prototype.doPreparedJumps = function() {
+	if (this.jumps.length === 0)
+		return
+	this.jumps.forEach(function(jump) {
+		this.jump(jump.time, jump.wave)
 	}, this)
-	this.timewaves.forEach(function(wave) {
-		if (wave.wraparound && wave.time > this.stateFrequency * this.stateCount)
-			this.jump(0, wave)
-	}, this)
+	this.jumps.length = 0
 }
 
 Timeline.prototype.sortWaves = function() {

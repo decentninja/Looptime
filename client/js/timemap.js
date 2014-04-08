@@ -17,7 +17,7 @@ Timemap.prototype.onTimecursorUpdate = function(time) {
   this.timecursor = time
 }
 
-Timemap.prototype.readTimelines = function() {
+Timemap.prototype.onSmallTickDone = function() {
   this.timeline.timewaves.forEach(function(wave) {
     this.readState(wave.time, wave.state)
   }, this)

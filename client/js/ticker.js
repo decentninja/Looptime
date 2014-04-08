@@ -5,7 +5,6 @@
 var TIMEJUMP_DELAY = 120 //roughly 2 seconds
 
 function Ticker() {
-  this.delayedJumpers = []
   this.controlled = [] //should be set externally
 }
 
@@ -13,15 +12,6 @@ Ticker.prototype.connect = function(collisionMap, timeline, sendmess) {
   this.collisionMap = collisionMap
   this.timeline = timeline
   this.sendmess = sendmess
-}
-
-Ticker.prototype.doDelayedJumps = function() {
-  if (this.delayedJumpers.length > 0) {
-    this.delayedJumpers.forEach(function(info) {
-      this.timeline.jump(info[0], info[1])
-    }, this)
-    this.delayedJumpers.length = 0
-  }
 }
 
 Ticker.prototype.tick = function(time, state, events, latestAcceptableTime) {
@@ -99,7 +89,7 @@ Ticker.prototype.handleJump = function(time, state, timer) {
 
     if (this.controlled[timer.id].version === timer.version) {
       this.controlled[timer.id].version++
-      this.delayedJumpers.push([timer.jumptarget, this.controlled[timer.id].timewave])
+      this.timeline.prepareJump(timer.jumptarget, this.controlled[timer.id].timewave)
       this.sendmess.send(-1, "onNewJumpSuccessful", timer.id)
     }
     this.timeline.ensurePlayerAt(timer.jumptarget, player)
