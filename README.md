@@ -1,7 +1,7 @@
 Looptime
 ========
 
-Looptime is a 3D multiplayer game built in HTML5, WebGL, JavaScript and GoLang.
+Looptime is a 3D multiplayer game built in HTML5, WebGL, JavaScript and GoLang. It features free-form jumps in time, grandfather paradoxes and other similar temporal shenanigans.
 
 
 Setup
