@@ -1,5 +1,9 @@
 when syncing over a network:
 - input-generating waves should be at the same time or with a delta > latency
 - input-generating waves should have the same speed
-- initiating a jump should disable playerinput for at least latency time, after which
-  the actual jump is done
+- it is assumed that all events that affect the state at the other side of a jump are
+	caused by the wave that does the jump (requires present-time invulnerability of at least latency time)
+
+- if a timewave has passed the point of an event that is to be inserted from the network the local
+	representation of the input-generating timewave (and possibly some additional ones) will have
+	more information than they should have

@@ -33,6 +33,7 @@ Timewave.prototype.noopTick = function(state) {
 	Bookkeeping events, states and waves
  */
 function Timeline(stateCount, stateFrequency, initialState) {
+	this.metatime = 0
 	this.timewaves = []
 	this.events = []    // IMPROV Prealocate for performance?
 	this.arrivals = []
@@ -87,19 +88,7 @@ Timeline.prototype.tick = function() {
 	}
 	this.doPreparedJumps()
 	this.sortWaves()
-}
-
-Timeline.prototype.prepareJump = function(time, timewave) {
-	this.jumps.push({time: time, wave: timewave})
-}
-
-Timeline.prototype.doPreparedJumps = function() {
-	if (this.jumps.length === 0)
-		return
-	this.jumps.forEach(function(jump) {
-		this.jump(jump.time, jump.wave)
-	}, this)
-	this.jumps.length = 0
+	this.metatime++
 }
 
 Timeline.prototype.sortWaves = function() {
@@ -156,12 +145,26 @@ Timeline.prototype.calcJumpTarget = function(time, metatimeOffset) {
 	return Math.floor(time/this.stateFrequency)*this.stateFrequency
 }
 
+Timeline.prototype.prepareJump = function(time, timewave) {
+	this.jumps.push({time: time, wave: timewave})
+}
+
+Timeline.prototype.doPreparedJumps = function() {
+	if (this.jumps.length === 0)
+		return
+	this.jumps.forEach(function(jump) {
+		this.jump(jump.time, jump.wave)
+	}, this)
+	this.jumps.length = 0
+}
+
 Timeline.prototype.jump = function(time, timewave) {
 	var i = 0
 	while (this.timewaves[i] && this.timewaves[i].time < time)
 		i++
 	if (this.timewaves[i] && this.timewaves[i].time === time) {
 		timewave.state = deepCopy(this.timewaves[i].state)
+		timewave.lastjump = {origin: timewave.time, target: time, metatime: this.metatime}
 		timewave.time = time
 		return timewave.time
 	}
@@ -172,7 +175,8 @@ Timeline.prototype.jump = function(time, timewave) {
   if (this.arrivals[time]) {
     timewave.state.players.push.apply(timewave.state.players, deepCopy(this.arrivals[time]))
   }
-	timewave.time = index*this.stateFrequency
+  timewave.lastjump = {origin: timewave.time, target: index*this.stateFrequency, metatime: this.metatime}
+	timewave.time = timewave.lastjump.target
 	return timewave.time
 }
 
@@ -197,54 +201,82 @@ Timeline.prototype.addEvent = function(event) {
 	before being overtaken by a timewave.
 */
 Timeline.prototype.addAndReplayEvents = function(events, timewave) {
+	if (this.jumps.length > 0) {
+		console.warn("Some jumps were prepared when addAndReplayEvents was entered, they will never happen, WARN YOUR LOCAL TIMEWAVE-SPECIALIST! (or make sure no prepareJump()s happen outside of Ticker.tick())")
+	}
+
 	events.forEach(this.addEvent, this)
 	var event = events[0]
 	var tempwave = new Timewave(-1, false, false)
 	this.jump(event.time, tempwave)
-	this.sortWaves()
-	var i = 0
-	while (this.timewaves[i] && this.timewaves[i].time <= event.time)
-		i++
-	//i points to the first timewave that may be affected
+	var startTime = event.time
+	var startMetatime = event.metatime
+	var endTime = timewave.time
 
-	var j = i
-	while (this.timewaves[j] && this.timewaves[j].time <= timewave.time)
-		j++
-	//j points to the first timewave after the supplied timewave
+	var hasJumped = function(w) {
+		return event.metatime <= w.lastjump.metatime && w.lastjump.metatime <= this.metatime
+	}.bind(this)
 
-	var branchpoints = []
-	var s = timewave
-	while (this.timewaves[j]) {
-		var f = this.timewaves[j]
-		var branchpoint = Math.floor(s.time + s.speed*(f.time - s.time)/(s.speed - f.speed))
-		if (branchpoint >= event.time) {
-			if (!branchpoints[branchpoint])
-				branchpoints[branchpoint] = []
-			branchpoints[branchpoint].push(f)
-		}
-		j++
-	}
-
-	while (tempwave.time < timewave.time) {
-		tempwave.tick(this.events[tempwave.time], this.arrivals[tempwave.time+1], this.ticker)
-		this.saveState(tempwave.time, tempwave.state)
-
-		//update the state of all passed waves
-		while (this.timewaves[i] && this.timewaves[i].time === tempwave.time) {
-			console.log("addAndReplayEvent affected a timewave")
-			this.timewaves[i].state = deepCopy(tempwave.state)
+	var work = function() {
+		var i = 0
+		while (this.timewaves[i] && this.timewaves[i].time <= startTime)
 			i++
+		//i points to the first timewave that may be affected
+
+		var j = i
+		while (this.timewaves[j] && this.timewaves[j].time <= endTime)
+			j++
+		//j points to the first timewave after the supplied timewave
+
+		var branchpoints = []
+		var s = {time: endTime, speed: timewave.speed}
+		while (this.timewaves[j]) {
+			var f = this.timewaves[j]
+			var branchpoint = Math.floor(s.time + s.speed*(f.time - s.time)/(s.speed - f.speed))
+			if (branchpoint >= startTime && (!hasJumped(f) || branchpoint >= f.lastjump.target)) {
+				if (!branchpoints[branchpoint])
+					branchpoints[branchpoint] = []
+				branchpoints[branchpoint].push(f)
+			}
+			j++
 		}
 
-		//update the state of all waves that overtook timewave at this time
-		if (branchpoints[tempwave.time]) {
-			var metatimeFilter = event.metatime + tempwave.time - event.time
-			branchpoints[tempwave.time].forEach(function(f) {
-				var twave = deepCopy(tempwave)
-				while (twave.time < f.time)
-					twave.tick(this.events[twave.time], this.arrivals[tempwave.time+1], this.ticker, metatimeFilter)
-				f.state = twave.state
-			}, this)
+		while (tempwave.time < endTime) {
+			tempwave.tick(this.events[tempwave.time], this.arrivals[tempwave.time+1], this.ticker)
+			this.saveState(tempwave.time, tempwave.state)
+
+			//update the state of all passed waves
+			while (this.timewaves[i] && this.timewaves[i].time === tempwave.time) {
+				console.log("addAndReplayEvent affected a timewave")
+				this.timewaves[i].state = deepCopy(tempwave.state)
+				i++
+			}
+
+			//update the state of all waves that overtook timewave at this time
+			if (branchpoints[tempwave.time]) {
+				var metatimeFilter = startMetatime + (tempwave.time - startTime) / timewave.speed
+				branchpoints[tempwave.time].forEach(function(f) {
+					var twave = deepCopy(tempwave)
+					while (twave.time < f.time)
+						twave.tick(this.events[twave.time], this.arrivals[twave.time+1], this.ticker, metatimeFilter)
+					f.state = twave.state
+				}, this)
+			}
 		}
+	}.bind(this)
+
+	if (hasJumped(timewave)) {
+		endTime = timewave.lastjump.origin
+
+		work()
+
+		startTime = timewave.lastjump.target
+		startMetatime = timewave.lastjump.metatime
+		endTime = timewave.time
+		this.jump(startTime, tempwave)
 	}
+
+	work()
+
+	this.jumps.length = 0
 }
