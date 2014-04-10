@@ -191,34 +191,30 @@ Ticker.prototype.handleFireEvent = function(time, state, player) {
 }
 
 Ticker.prototype.wrapItUp = function(time, state) {
-  this.wrapJumpers.forEach(function(jumper) {
-    for (var i = 0; i < state.players.length; i++) {
-      if (state.players[i].id === jumper.id && state.players[i].version === jumper.version)
-        break
-    }
-    if (i === state.players.length)
-      this.timeline.removePlayerAt(0, jumper)
-  }, this)
-
-  state.players.forEach(function(player) {
-    for (var i = 0; i < this.wrapJumpers.length; i++) {
-      if (player.id === this.wrapJumpers[i].id && player.version === this.wrapJumpers[i].version)
-        break
-    }
-    if (player.version === this.controlled[player.id].version && this.controlled[player.id].timewave.time !== time) {
-      return
-    }
-    if (i === this.wrapJumpers.length) {
-      this.wrapJumpers.push({id: player.id, version: player.version})
-    }
-    this.timeline.ensurePlayerAt(0, player)
-  }, this)
-
   this.controlled.forEach(function(contr) {
     if (contr.timewave.time === time) {
+      this.wrapJumpers.push({id: contr.id, version: contr.version})
       contr.version++
       this.timeline.prepareJump(0, contr.timewave)
       this.sendmess.send(-1, "onNewJump", contr.id)
     }
   }, this)
+
+  this.wrapJumpers.forEach(function(jumper) {
+    for (var i = 0; i < state.players.length; i++) {
+      if (state.players[i].id === jumper.id && state.players[i].version === jumper.version)
+        return
+    }
+    this.timeline.removePlayerAt(0, jumper)
+  }, this)
+
+  state.players.forEach(function(player) {
+    for (var i = 0; i < this.wrapJumpers.length; i++) {
+      if (player.id === this.wrapJumpers[i].id && player.version === this.wrapJumpers[i].version) {
+        this.timeline.ensurePlayerAt(0, player)
+        return
+      }
+    }
+  }, this)
+
 }
