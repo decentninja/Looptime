@@ -2,12 +2,12 @@
 
 var PLAYER_SPEED = 0.02
 var FRICTION = .9
-var GRAVITY = -0.005
+var GRAVITY = -0.006
 var HEAD_HEIGHT = 10
 var STEP_HEIGHT = 2.5
 var NUDGE = 0.01
 var SNAP_DISTANCE = 2
-var JUMP_HEIGHT = 2.1
+var JUMP_HEIGHT = 2.3
 var PLAYER_THICKNESS = 2
 
 /*
