@@ -51,6 +51,10 @@ Timeline.prototype.connect = function(timemap, ticker, sendmess) {
 	this.sendmess = sendmess
 }
 
+Timeline.prototype.length = function () {
+	return this.stateFrequency * this.stateCount
+}
+
 Timeline.prototype.createTimewave = function(time, speed, snap, wraparound) {
 	var wave = new Timewave(speed, snap, wraparound)
 	this.timewaves.push(wave)
@@ -69,7 +73,7 @@ Timeline.prototype.tick = function() {
 		var tickerwave = this.timewaves[ti]
 		while (tickerwave.ticksDoneThisTick < tickerwave.speed) {
 			tickerwave.tick(this.events[tickerwave.time], this.arrivals[tickerwave.time+1], this.ticker)
-			if (tickerwave.time <= this.stateFrequency * this.stateCount) {
+			if (tickerwave.time < this.length()) {
 				//do noop ticks for all waves that were on the same time and that still have ticks to do
 				for (var i = 0; i < this.timewaves.length; i++) {
 					var wave = this.timewaves[i]

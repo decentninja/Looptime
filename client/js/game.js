@@ -46,6 +46,7 @@ function Game(numplayers, playerid, network, sendmess) {
 	// Set up ticker controlled array and create timewaves for other players
 	for (var id = 0; id < numplayers; id++) {
 		this.ticker.controlled.push({
+			id: id,
 			version: 0,
 			timewave: id === playerid ? playerwave : this.timeline.createTimewave(startTime, 1, true, false)
 		})

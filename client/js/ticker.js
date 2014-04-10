@@ -6,6 +6,7 @@ var TIMEJUMP_DELAY = 120 //roughly 2 seconds
 
 function Ticker() {
   this.controlled = [] //should be set externally
+  this.wrapJumpers = []
 }
 
 Ticker.prototype.connect = function(collisionMap, timeline, sendmess) {
@@ -36,6 +37,10 @@ Ticker.prototype.tick = function(time, state, events, latestAcceptableTime) {
   state.jumptimers = state.jumptimers.filter(function(timer) {
     return timer.timeLeft > 0
   })
+
+  if (time === this.timeline.length() - 1) {
+    this.wrapItUp(time, state)
+  }
 }
 
 Ticker.prototype.handleEvent = function(time, state, event) {
@@ -90,7 +95,7 @@ Ticker.prototype.handleJump = function(time, state, timer) {
     if (this.controlled[timer.id].version === timer.version) {
       this.controlled[timer.id].version++
       this.timeline.prepareJump(timer.jumptarget, this.controlled[timer.id].timewave)
-      this.sendmess.send(-1, "onNewJumpSuccessful", timer.id)
+      this.sendmess.send(-1, "onNewJump", timer.id)
     }
     this.timeline.ensurePlayerAt(timer.jumptarget, player)
     state.players.splice(i, 1)
@@ -158,7 +163,7 @@ Ticker.prototype.handleFireEvent = function(time, state, player) {
     targets.push(model.body)
   })
 
-  var hit = ray.intersectObjects(targets, false)
+  var hit = ray.intersectObjects(targets)
   if(hit.length !== 0) { //todo: check colliion with obstacles
     var targetModel = hit[0].object.parent
     console.log("hit", targetModel)
@@ -183,4 +188,37 @@ Ticker.prototype.handleFireEvent = function(time, state, player) {
       direction: player.getLookDirection(),
     })
   }
+}
+
+Ticker.prototype.wrapItUp = function(time, state) {
+  this.wrapJumpers.forEach(function(jumper) {
+    for (var i = 0; i < state.players.length; i++) {
+      if (state.players[i].id === jumper.id && state.players[i].version === jumper.version)
+        break
+    }
+    if (i === state.players.length)
+      this.timeline.removePlayerAt(0, jumper)
+  }, this)
+
+  state.players.forEach(function(player) {
+    for (var i = 0; i < this.wrapJumpers.length; i++) {
+      if (player.id === this.wrapJumpers[i].id && player.version === this.wrapJumpers[i].version)
+        break
+    }
+    if (player.version === this.controlled[player.id].version && this.controlled[player.id].timewave.time !== time) {
+      return
+    }
+    if (i === this.wrapJumpers.length) {
+      this.wrapJumpers.push({id: player.id, version: player.version})
+    }
+    this.timeline.ensurePlayerAt(0, player)
+  }, this)
+
+  this.controlled.forEach(function(contr) {
+    if (contr.timewave.time === time) {
+      contr.version++
+      this.timeline.prepareJump(0, contr.timewave)
+      this.sendmess.send(-1, "onNewJump", contr.id)
+    }
+  }, this)
 }

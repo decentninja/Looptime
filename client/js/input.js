@@ -17,7 +17,7 @@ Input.prototype.connect = function(timeline, playerwave, sendmess) {
   this.sendmess = sendmess
 }
 
-Input.prototype.onNewJumpSuccessful = function(id) {
+Input.prototype.onNewJump = function(id) {
   if (this.controlledId === id) {
     this.controlledVersion++
     this.inputIsAllowed = true

@@ -18,7 +18,7 @@ Graphics.prototype.connect = function(map, playerwave) {
   this.playerwave = playerwave
 }
 
-Graphics.prototype.onNewJumpSuccessful = function(id) {
+Graphics.prototype.onNewJump = function(id) {
   if (this.controlledId === id)
     this.controlledVersion++
 }
