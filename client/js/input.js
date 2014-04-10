@@ -1,6 +1,6 @@
 "strict mode";
 
-/* global SAVE_STATE_RATE, TIMEJUMP_DELAY */
+/* global TIMEJUMP_DELAY */
 
 function Input(playerid) {
   this.pointerIsLocked = false
@@ -20,7 +20,6 @@ Input.prototype.connect = function(timeline, playerwave, sendmess) {
 Input.prototype.onNewJump = function(id) {
   if (this.controlledId === id) {
     this.controlledVersion++
-    this.inputIsAllowed = true
   }
 }
 
@@ -50,7 +49,7 @@ Input.prototype.onWindowInput = function(event) {
       if(this.timecursor < 0) {
         this.timecursor = 0
       }
-      var max = this.timeline.states.length * SAVE_STATE_RATE - 1
+      var max = this.timeline.length() - 1
       if(this.timecursor > max) {
         this.timecursor = max
       }
@@ -61,7 +60,6 @@ Input.prototype.onWindowInput = function(event) {
       if(event.button == 2) {
         internalEvent.type = "jump"
         internalEvent.jumptarget = this.timeline.calcJumpTarget(this.timecursor, TIMEJUMP_DELAY)
-        this.inputIsAllowed = false
       }
       break
   }
