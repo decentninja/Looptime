@@ -6,7 +6,7 @@
 	DOM stuff, start and global debugging hooks
  */
 
-var debug = location.protocol === "file:" || location.search.indexOf("debug")
+var debug = location.protocol === "file:" || location.search.indexOf("debug") != -1
 
 var el = document.querySelector("#game")
 var renderer = new THREE.WebGLRenderer({
