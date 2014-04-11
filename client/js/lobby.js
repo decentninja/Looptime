@@ -35,6 +35,9 @@ function Lobby() {
 	this.collision.scale.multiplyScalar(300)
 	this.collision.position.y -= 1400
 
+	this.collision.lowY = -400
+	this.collision.highY = 400
+
 	this.collision.updateMatrixWorld()
 }
 

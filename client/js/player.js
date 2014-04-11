@@ -123,6 +123,10 @@ Player.prototype.update = function(deltatime, collision) {
 	}
 	
 	this.position.add(change)
+
+	if (this.position.y <= collision.lowY) {
+		this.position.y = collision.highY
+	}
 }
 
 /*
