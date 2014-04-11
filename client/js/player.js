@@ -2,7 +2,7 @@
 
 var PLAYER_SPEED = 0.02
 var FRICTION = .9
-var GRAVITY = -0.006
+var GRAVITY = -0.007
 var HEAD_HEIGHT = 10
 var STEP_HEIGHT = 2.5
 var NUDGE = 0.01
@@ -73,23 +73,20 @@ Player.prototype.getLookDirection = function() {
 }
 
 Player.prototype.update = function(deltatime, collision) {
-	if (this.grounded) {
-		var acceleration = new THREE.Vector3(
-			this.movement.right - this.movement.left,
-			0,
-			this.movement.back - this.movement.forward
+	var acceleration = new THREE.Vector3(
+		this.movement.right - this.movement.left,
+		0,
+		this.movement.back - this.movement.forward
 		)
-		var quaternion = new THREE.Quaternion()
-		quaternion.setFromEuler(this.look)
-		acceleration.applyQuaternion(quaternion)
+	var quaternion = new THREE.Quaternion()
+	quaternion.setFromEuler(this.look)
+	acceleration.applyQuaternion(quaternion)
 
-		acceleration.y = 0		// No fly
-		acceleration.setLength(PLAYER_SPEED * deltatime)
-		this.velocity.add(acceleration)
-		this.velocity.multiplyScalar(FRICTION)
-	} else {
-		//TODO: whatever we want to do while in the air
-	}
+	acceleration.y = 0		// No fly
+	acceleration.setLength(PLAYER_SPEED * deltatime)
+	this.velocity.add(acceleration)
+	this.velocity.x *= FRICTION
+	this.velocity.z *= FRICTION
 
 	this.velocity.y += GRAVITY * deltatime
 
@@ -118,8 +115,9 @@ Player.prototype.update = function(deltatime, collision) {
 	}
 	hits = ray.intersectObject(collision)
 	if(hits.length > 0) {
-		change.y -= hits[0].distance - HEAD_HEIGHT - NUDGE
+		change.y = -(hits[0].distance - HEAD_HEIGHT)
 		this.grounded = true
+		this.velocity.y = 0
 	} else {
 		this.grounded = false
 	}
